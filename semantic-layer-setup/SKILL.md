@@ -24,7 +24,7 @@ This is not a data warehouse project. It's a documentation and governance exerci
 
 When you ask AI "why is churn up this quarter," the first thing it needs to know is how you calculate churn. Not the textbook definition. Your definition. Which customers count. What time period. Whether voluntary and involuntary are separated or blended. Whether a downgrade counts as churn or contraction.
 
-Most organizations don't have this documented. The definition lives in a finance team's spreadsheet formula, a Salesforce report filter, or a senior leader's memory. Different teams often calculate the same metric differently without realizing it.
+The definition lives in a finance team's spreadsheet formula, a Salesforce report filter, or a senior leader's memory. Different teams often calculate the same metric differently without realizing it.
 
 AI doesn't resolve this ambiguity. It picks one version or infers its own. The output looks confident either way. The person reading it has no way to know which definition the AI used, or whether it matches the one the board expects to see.
 
@@ -93,7 +93,7 @@ A separate document (or tab/section within the glossary) that maps every CRM and
 | Known issues | Any known data quality problems — e.g., "40% of records have this blank," "legacy values from before 2024 use a different picklist" |
 | AI access | Can AI tools read this field? Can they write to it? Should they be restricted from either? |
 
-**The AI access column is critical.** Not every field should be visible to AI. PII, sensitive compensation data, and certain custom fields should be explicitly excluded from AI read access. Document which fields are AI-readable and which are restricted, so the boundary is a policy decision rather than an accident of integration.
+**The AI access column is critical.** Not every field should be visible to AI. PII, sensitive compensation data, contact data protected by privacy laws (GDPR), and certain custom fields should be explicitly excluded from AI read access. Document which fields are AI-readable and which are restricted, so the boundary is a policy decision rather than an accident of integration.
 
 ### Component 3: Standing System Prompts
 
@@ -162,7 +162,7 @@ For every metric you've defined, trace it back to the actual fields in the sourc
 
 ### Step 5: Set AI access boundaries
 
-Review every field in the documentation and explicitly decide: can AI read this? Can AI write to it? Fields containing PII, compensation data, or sensitive internal notes should be restricted by policy, not left to whatever the integration defaults to.
+Review every field in the documentation and explicitly decide: can AI read this? Can AI write to it? Fields containing PII (GDPR), compensation data, or sensitive internal notes should be restricted by policy, not left to whatever the integration defaults to.
 
 ### Step 6: Build standing prompts
 
