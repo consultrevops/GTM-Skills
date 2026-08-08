@@ -1,6 +1,14 @@
 ---
 name: why-audit
-description: "Validates whether an AI-generated "why" answer about revenue outcomes (win rate, churn, pipeline movement) is a verified explanation or an unverified narrative. Triggers on 'why did we lose,' 'why is win rate down,' 'why is churn up,' 'explain this dip,' 'what caused this,' 'root cause analysis,' 'deal risk explanation,' 'forecast variance explanation,' or any request asking an AI agent to explain a revenue outcome rather than report a number. BOUNDARY: For building the underlying data structure this skill depends on, see semantic-layer-setup."
+description: >
+  Validates whether an AI-generated why answer about revenue outcomes
+  (win rate, churn, pipeline movement) is a verified explanation or an
+  unverified narrative. Triggers on why did we lose, why is win rate down,
+  why is churn up, explain this dip, what caused this, root cause analysis,
+  deal risk explanation, forecast variance explanation, or any request
+  asking an AI agent to explain a revenue outcome rather than report a
+  number. BOUNDARY - For building the underlying data structure this skill
+  depends on, see semantic-layer-setup.
 ---
 
 # Why Audit — Validating Causal Claims Before They Become the Story
