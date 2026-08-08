@@ -10,8 +10,7 @@ description: >
   drift, forecast was off, the agent messed up, incident response, or
   any situation where an AI-touched output in the revenue stack produced
   a wrong result that was acted on. BOUNDARY - For validating AI outputs
-  before they become incidents, see why-audit. For building the reporting
-  architecture that makes incidents visible, see board-control-book.
+  before they become incidents, see why-audit.
 ---
 
 # Agentic Incident Playbook — What to Do When AI Gets It Wrong in Your Revenue Stack
@@ -54,7 +53,7 @@ Every agentic AI incident in a revenue stack falls into one of these categories.
 
 **Example:** An outbound sequencing agent was configured to enroll new leads into a nurture sequence. A configuration error caused it to also re-enroll churned customers into a win-back sequence that hadn't been approved, sending pricing offers to accounts that left on bad terms.
 
-**How you'd catch it:** A customer or rep reports something unexpected. An audit log shows actions outside the agent's defined scope. A field changed that nobody remembers changing.
+**How you'd catch it:** A customer or rep reports something unexpected. For field updates, check the field history in your CRM — it logs what changed, when, and what user or integration made the change. An agent writing to a field it shouldn't touch will show up there before anyone notices the downstream effect. For actions outside the CRM (emails sent, sequences triggered), check the agent's own audit log for actions outside its defined scope.
 
 **Severity:** High. Direct customer or prospect impact. Potential brand and relationship damage.
 
@@ -98,10 +97,12 @@ When an incident is identified, follow this sequence. Do not skip steps.
 
 **Goal:** Stop the error from spreading further.
 
+**Who acts:** Every containment action is performed by a human. The agent that caused the incident should not be trusted to assess or contain its own failure.
+
 | Failure type | Containment action |
 |---|---|
 | Model drift | Pause the model's outputs from feeding downstream systems. Revert to manual scoring/classification until recalibrated. |
-| Unauthorized action | Revoke the agent's write access immediately. Identify every action taken outside scope from audit logs. |
+| Unauthorized action | Revoke the agent's write access immediately. For CRM field changes, pull the field history to identify every record the agent touched. For actions outside the CRM (emails sent, sequences triggered), pull the agent's own audit log to identify every action taken outside its defined scope. |
 | Cascading error | Trace the chain back to the originating data point. Quarantine every record the error touched. |
 | Confident wrong narrative | Retract or flag the narrative in every place it was shared — board deck, Slack, email, CRM notes. Notify everyone who received it. |
 | Stale/partial data | Flag the output as unverified. Re-run the analysis with explicit data-coverage checks or do it manually. |
@@ -121,14 +122,15 @@ When an incident is identified, follow this sequence. Do not skip steps.
 
 ### Step 3: Notify
 
-**Who needs to know, and in what order:**
+**Who needs to know depends on severity:**
 
-1. **The owner of the affected section** (per the control book ownership table). They need to know their number may be wrong.
-2. **Anyone who made a decision based on the output.** This is uncomfortable but non-negotiable. A decision made on wrong data doesn't fix itself.
-3. **The board, if the output reached a board deck or investor communication.** Proactive disclosure via the AI Disclosure Log (Section 7 of the control book) is far better than a board member catching it later.
-4. **Customers or prospects, if they received a wrong communication.** Handled by the relationship owner (rep or CSM), not by a mass correction email.
+**Critical and High:** Notify the head of every affected department (sales, marketing, CS, finance — whoever owns a metric or process the error touched), anyone who made a decision based on the output, and leadership if the output reached a board deck, investor communication, or customer. If a customer or prospect received a wrong communication, the relationship owner (rep or CSM) handles the correction directly. These notifications happen the same day and cannot wait for root cause.
 
-**Rule:** Notification is not optional and cannot be delayed until root cause is complete. "We found an error, here's what we know so far, here's what we're doing" is a complete notification. "We'll tell them once we understand it fully" is how errors become trust-destroying surprises.
+**Medium:** Notify the affected department head and document the incident. Broader notification is a judgment call based on whether the error, even though it was caught, reveals a pattern that others should know about.
+
+**Low:** Document it. Notify the affected department head if recalibration is needed. No broader notification unless investigation reveals a higher severity than initially assessed.
+
+**Rule:** For Critical and High incidents, notification cannot be delayed until root cause is complete. "We found an error, here's what we know so far, here's what we're doing" is a complete notification. For Medium and Low, use judgment on timing and scope.
 
 ### Step 4: Root Cause
 
@@ -150,7 +152,7 @@ When an incident is identified, follow this sequence. Do not skip steps.
 
 1. **Correct the data.** Fix every record the error touched. This is often the most time-consuming step because cascading errors can touch hundreds of records.
 2. **Correct the decisions.** Revisit every decision that was informed by the wrong output. Some may still be correct despite the bad input. Others need to be reversed.
-3. **Correct the system.** Implement the systemic fix identified in root cause. This goes into the `references/post-incident-changes-log.md` and gets reported in the next cycle's AI Disclosure Log.
+3. **Correct the system.** Implement the systemic fix identified in root cause. Log the change in `references/post-incident-changes-log.md`.
 
 ### Step 6: Test the Fix
 
@@ -174,7 +176,7 @@ Log the full incident in `references/incident-log-template.md`:
 - Test results
 - Who was notified
 
-This log is referenced in the next board cycle's AI Disclosure Log (Section 7 of the control book) under "Known limitations" or as a standalone incident disclosure.
+If your organization maintains an AI disclosure log or board reporting package, this incident log feeds directly into that reporting cycle. If not, the incident log is the permanent record of what happened and what changed.
 
 ---
 
@@ -183,8 +185,8 @@ This log is referenced in the next board cycle's AI Disclosure Log (Section 7 of
 | Severity | Definition | Response time | Escalation |
 |---|---|---|---|
 | Critical | Wrong output reached a board, a customer, or triggered a strategic decision | Contain within 1 hour. Notify stakeholders same day. | CRO + CEO immediately |
-| High | Wrong output reached reps or managers and may have influenced deal-level decisions | Contain within 4 hours. Notify affected teams within 24 hours. | CRO + section owner |
-| Medium | Wrong output was generated but caught before it influenced a decision | Document and fix within 1 week. | Section owner |
+| High | Wrong output reached reps or managers and may have influenced deal-level decisions | Contain within 4 hours. Notify affected teams within 24 hours. | CRO + affected department head |
+| Medium | Wrong output was generated but caught before it influenced a decision | Document and fix within 1 week. | Affected department head |
 | Low | A potential drift or quality degradation was flagged proactively, no wrong output yet | Investigate within 2 weeks. Recalibrate if confirmed. | RevOps |
 
 ---
@@ -197,7 +199,7 @@ A playbook you haven't tested is a hypothesis. Run a tabletop exercise at least 
 
 1. Pick one failure type from the five above.
 2. Write a realistic scenario (use the examples in this document or create your own from a near-miss your team has actually experienced).
-3. Walk through the response protocol with every person who would be involved in a real incident — RevOps, the section owner, the CRO, whoever manages the AI tool.
+3. Walk through the response protocol with every person who would be involved in a real incident — RevOps, the affected department head, the CRO, whoever manages the AI tool.
 4. Time each step. Note where people hesitate, where ownership is unclear, and where the protocol assumes something that isn't actually set up (e.g., "check the audit log" when no audit log exists).
 5. Fix every gap the exercise surfaces before it becomes a gap in a real incident.
 
@@ -219,11 +221,10 @@ A playbook you haven't tested is a hypothesis. Run a tabletop exercise at least 
 | File | When to read | What's inside |
 |---|---|---|
 | `references/incident-log-template.md` | Every incident | Structured log for documenting the full incident lifecycle |
-| `references/post-incident-changes-log.md` | After remediation | Running log of systemic changes made after incidents, referenced in the board AI Disclosure Log |
+| `references/post-incident-changes-log.md` | After remediation | Running log of systemic changes made after incidents |
 | `references/tabletop-scenarios.md` | Quarterly exercises | Pre-written scenarios for each failure type, ready to run |
 
 ## Related Skills
 
 - **why-audit** — prevents Type 4 (confident wrong narrative) incidents by validating causal claims before they reach decisions
-- **board-control-book** — the AI Disclosure Log (Section 7) is where resolved incidents get reported to the board
 - **semantic-layer-setup** — prevents Type 1 (model drift) and Type 3 (cascading errors) by ensuring metric definitions are documented and versioned
