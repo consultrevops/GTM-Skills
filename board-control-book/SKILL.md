@@ -13,7 +13,7 @@ The goal is not a better slide deck. It's a reporting architecture that works th
 
 ## The Problem This Solves
 
-Most revenue teams rebuild their board reporting from scratch every quarter. Someone spends two days pulling numbers from five systems, reconciling discrepancies between what sales sees and what finance sees, and formatting slides that will be outdated by the time the meeting starts.
+Most revenue teams rebuild their board reporting from scratch every quarter. Someone spends a week pulling numbers from five systems, reconciling discrepancies between what sales sees and what finance sees, and formatting slides that will be outdated by the time the meeting starts.
 
 Three things go wrong consistently:
 
@@ -41,9 +41,9 @@ When the format is consistent, directors stop asking what the numbers are. They 
 
 | Component | What it covers | Owner |
 |---|---|---|
-| P&L snapshot | Revenue, gross margin, operating expenses, EBIT — actuals vs. plan vs. prior period | Finance |
-| Cash position | Cash on hand, burn rate, runway — actuals vs. forecast | Finance |
-| ARR movement | Starting ARR, new, expansion, contraction, churn, ending ARR — with waterfall | RevOps / Finance |
+| P&L snapshot | Revenue, gross margin, operating expenses, EBIT — actuals vs. plan vs. prior period | CFO |
+| Cash position | Cash on hand, burn rate, runway — actuals vs. forecast | CFO |
+| ARR movement | Starting ARR, new, expansion, contraction, churn, ending ARR — with waterfall | CRO |
 
 **Rules:**
 - Same format every cycle — no restructuring the waterfall categories quarter to quarter
@@ -54,30 +54,66 @@ When the format is consistent, directors stop asking what the numbers are. They 
 
 | Component | What it covers | Owner |
 |---|---|---|
-| Pipeline coverage | Current pipeline vs. target, by segment and stage, with coverage ratio | RevOps |
-| Forecast summary | Committed, best case, and upside — with movement from prior period | RevOps / Sales |
-| Stage conversion rates | Stage-to-stage conversion rates vs. historical average | RevOps |
-| Deal velocity | Average days in stage, by segment — current vs. trailing 3 quarters | RevOps |
+| Pipeline coverage | Current pipeline vs. target, by segment and stage, with coverage ratio | CRO / RevOps |
+| Forecast summary | Committed, best case, and upside — with movement from prior period | CRO / RevOps |
+| Stage conversion rates | Stage-to-stage conversion rates vs. historical average | CRO / RevOps |
+| Deal velocity | Average days in stage, by segment — current vs. trailing 3 quarters | CRO / RevOps |
+| Lost rates by stage | Loss rates and categorized loss reasons at each funnel and opportunity stage, broken down by source/channel, region, industry, product, and rep | CRO / RevOps |
 
 **Rules:**
-- Pipeline is reported in the filtered view (excluding bot activity and known false signals), not the raw unfiltered number
+- Pipeline is reported after hygiene filters are applied — excluding deals past their close date that haven't been updated, zombie deals with no activity in 45+ days, and test/duplicate records. The board should see the pipeline the CRO is actually working, not the raw unfiltered number that includes dead weight.
 - Forecast categories (commit, best case, upside) have written definitions that don't change between cycles — if a CRO and a rep would categorize the same deal differently, the definitions need tightening
 - If pipeline scoring or forecast weighting uses an AI model, disclose it: name the model, when it was last calibrated, and what its historical accuracy has been
-- Stage conversion rates are compared against your own historical baseline, not an external benchmark — "industry average" is not a meaningful comparator for your specific motion
+- Compare stage conversion rates against your own historical baseline first. External benchmarks can add context but shouldn't substitute for understanding your own motion's patterns.
+- Lost rates are tracked at every stage, not just closed-lost. Where in the pipeline deals die is as important as the final win rate. Loss reasons use a defined taxonomy and should be reported quarterly to each department, especially product.
 
-### Section 3: Retention and Expansion
+### Section 3: Marketing Performance
 
 | Component | What it covers | Owner |
 |---|---|---|
-| Gross and net retention | GRR and NRR — actuals vs. plan, trailing 4 quarters | RevOps / CS |
-| Churn detail | Lost customers with categorized reasons (voluntary/involuntary, by segment) | CS / RevOps |
-| Expansion pipeline | Expansion opportunities by stage and expected close | CS / Sales |
+| Marketing-sourced and marketing-influenced pipeline | Pipeline generated and influenced from marketing channels — by source/channel, with conversion rates from lead to opportunity | CMO |
+| Lead volume and quality | Total leads, MQLs, and SQL conversion rates — by source/channel, with trend vs. prior period | CMO |
+| Marketing contribution to revenue | Percentage of closed-won revenue attributable to marketing-sourced pipeline | CMO / CRO |
+| Channel performance | Spend, pipeline generated, and cost-per-opportunity by channel | CMO |
+
+**Rules:**
+- Attribution methodology must be documented and consistent across cycles. If the org uses multi-touch attribution, disclose the model. If first-touch or last-touch, state it. The board should never have to ask "how are you counting this."
+- Marketing-sourced and marketing-influenced need to be explicitly defined.
+- Marketing contribution to revenue is co-owned with the CRO because the number depends on how pipeline handoff is defined — if marketing and sales disagree on what counts as marketing-sourced, fix the definition before reporting it.
+- Channel performance is reported with enough history (trailing 3-4 quarters minimum) to show trend, not just current-period spend. A channel that looks expensive this quarter may have a longer payback cycle that only shows up over time.
+- If any lead scoring, attribution modeling, or content performance analysis uses AI, disclose it in Section 7 (AI Disclosure Log).
+
+### Section 4: Retention and Expansion
+
+| Component | What it covers | Owner |
+|---|---|---|
+| Gross and net retention | GRR and NRR — actuals vs. plan, trailing 4 quarters | CRO / CS |
+| Churn detail | Lost customers with categorized reasons (voluntary/involuntary, by segment) | CRO / CS |
+| Customer health summary | Global health score with component breakdown — product usage, support, account growth, feedback, advocate scores | CRO / CS |
+| Expansion pipeline | Expansion opportunities by stage and expected close | CRO / CS |
+| Product white space | Matrix of customers by product — showing what each customer has, what they don't, and where open expansion opportunities exist | CRO / CS |
 
 **Rules:**
 - Churn reasons use a defined taxonomy, not free text only — see `why-audit/references/context-object-schema.md` for the category structure
 - If churn analysis or health scoring uses AI, disclose it and flag any score that triggered an action (e.g., "AI flagged this account as high-risk, CS intervened")
+- Health scores are reported as both the current snapshot and the trend (improving, stable, declining) over the trailing 2-3 quarters. A single-point score without trend context invites misinterpretation.
+- Product white space is reviewed quarterly to identify systematic expansion gaps — if 80% of customers with Product A don't have Product B, that's a strategic finding, not just a rep-level upsell list
 
-### Section 4: Variance Narrative
+### Section 5: Unit Economics
+
+| Component | What it covers | Owner |
+|---|---|---|
+| CAC | Customer acquisition cost — total and marketing percentage of CAC, broken down by source/channel, segment, and product where possible | CFO / CRO |
+| CLTV | Customer lifetime value — current calculation and trailing trend | CFO / CRO |
+| CLTV:CAC ratio | Ratio of lifetime value to acquisition cost — actuals vs. target | CFO / CRO |
+| CAC payback period | Months to recover acquisition cost, by segment | CFO / CRO |
+
+**Rules:**
+- CAC should include sales and marketing costs at minimum. More mature models add customer support cost for renewing customers — disclose which costs are included so the board knows what's in the number
+- CLTV:CAC ratio is compared against the org's own historical trend, not a generic "3:1 is good" benchmark, unless the board specifically requests a benchmark comparison
+- If CAC or CLTV calculations use AI-assisted attribution models, disclose it in Section 6 (AI Disclosure Log)
+
+### Section 6: Variance Narrative
 
 This is the section most teams skip or fill with vague language. It's the most important section in the control book.
 
@@ -96,7 +132,7 @@ This is the section most teams skip or fill with vague language. It's the most i
 - If the explanation uses language from the false-confidence-markers list (`why-audit/references/false-confidence-markers.md`), it needs to be rewritten before it reaches the deck.
 - The narrative is owned by a named person, not generated by a tool. AI can inform it. A human writes it and stands behind it.
 
-### Section 5: AI Disclosure Log
+### Section 7: AI Disclosure Log
 
 This section is new relative to traditional control books and reflects the current reality that AI is touching revenue data in most organizations.
 
@@ -120,9 +156,9 @@ This section is new relative to traditional control books and reflects the curre
 
 **Step 2: Assign ownership.** Every section has one named owner. Not a team, one person. That person is accountable for accuracy, timeliness, and variance explanations in their section.
 
-**Step 3: Lock the format.** Commit to the structure and don't change it for at least 4 cycles. The whole point is pattern recognition — the board learns where to look and what to expect, so they can immediately spot when something moves. Changing the format resets that learning.
+**Step 3: Establish the format with the board. Present the structure to the board before the first live cycle and get alignment on what's included. Expect requests for additions or changes, especially in the first two cycles. The goal is to reach a stable format as quickly as possible so the board can build pattern recognition across quarters. Once stable, resist cosmetic changes, but treat board requests for new components or different breakdowns as legitimate inputs, not threats to the format. The discipline is consistency where it matters (same metric definitions, same ownership, same variance structure), not rigidity about which slides are in the deck.
 
-**Step 4: Set the variance threshold.** What counts as a variance worth explaining? 10% from plan is a reasonable starting point, but adjust based on stage and volatility. An early-stage company with 40% quarter-over-quarter swings needs a different threshold than a post-Series C company with mature forecasting.
+**Step 4: Set variance thresholds by section. Different metrics need different thresholds. A 10% swing in ARR is a fundamentally different signal than a 10% swing in deal velocity. Work with section owners and the board to define what counts as a variance worth explaining for each component. These thresholds may change over time at the board's request as the company matures or priorities shift. Document the current thresholds and update them explicitly rather than letting them drift informally.
 
 **Step 5: Run a dry run.** Before the first live board meeting using this format, run the full package internally with the executive team 3-5 days before. Every question that comes up in the dry run is a question that would have come up in the board meeting — catch it early.
 
@@ -143,7 +179,7 @@ This section is new relative to traditional control books and reflects the curre
 - Plain language in the variance narrative — if a board member needs a glossary to understand the explanation, rewrite it
 - State the miss before the explanation — don't lead with the excuse
 - Short, declarative sentences in variance explanations — no hedging, no "it's worth noting that"
-- If you're uncertain about a cause, say so — "We believe X based on Y, but we're still investigating Z" is more trustworthy than a confident guess
+- If you're uncertain about a cause, say so — "We believe X based on Y, but we're still investigating Z" is more trustworthy than a confident guess. NO GUESSING!
 
 ---
 
@@ -152,7 +188,7 @@ This section is new relative to traditional control books and reflects the curre
 | File | When to read | What's inside |
 |---|---|---|
 | `references/control-book-template.md` | First-time setup | A blank template with all sections, ready to fill |
-| `references/variance-explanation-examples.md` | Writing Section 4 | Good and bad examples of variance explanations |
+| `references/variance-explanation-examples.md` | Writing Section 5 | Good and bad examples of variance explanations |
 
 ## Related Skills
 
@@ -160,6 +196,4 @@ This section is new relative to traditional control books and reflects the curre
 - **agentic-incident-playbook** — response protocol when an AI-generated error reaches a board or decision
 - **semantic-layer-setup** — builds the metric definitions the control book depends on
 
-## Attribution
 
-The control book concept is adapted from Bill Conroy's board reporting methodology, originally described in an OpenView Partners article (2013). The AI disclosure log and integration with the why-audit framework are original additions by Consult RevOps.
