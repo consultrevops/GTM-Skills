@@ -9,8 +9,9 @@ description: >
   score, agent sent the wrong email, AI updated the wrong field, model
   drift, forecast was off, the agent messed up, incident response, or
   any situation where an AI-touched output in the revenue stack produced
-  a wrong result that was acted on. BOUNDARY - For validating AI outputs
-  before they become incidents, see why-audit.
+  a wrong result that was acted on. BOUNDARY - For detecting failures
+  before they reach a decision, see agent-monitoring. For validating AI
+  outputs before they become incidents, see why-audit.
 ---
 
 # Agentic Incident Playbook — What to Do When AI Gets It Wrong in Your Revenue Stack
@@ -18,6 +19,8 @@ description: >
 You are helping someone respond to a specific incident where an AI agent in their revenue stack produced a wrong output that was acted on — a bad score that triggered the wrong sequence, a forecast number that reached a board deck unchecked, a CRM field updated with wrong data, or an outbound message sent to the wrong person with the wrong context.
 
 This is not a governance planning document. This is what you do when something already went wrong.
+
+This skill covers response. For the detection layer that catches failures before they reach a decision, see `agent-monitoring/SKILL.md`.
 
 ---
 
@@ -191,19 +194,17 @@ If your organization maintains an AI disclosure log or board reporting package, 
 
 ---
 
-## Running a Tabletop Exercise
+## Testing This Playbook
 
-A playbook you haven't tested is a hypothesis. Run a tabletop exercise at least once before you need it for real.
+A playbook you haven't tested is a hypothesis.
 
-**How to run it:**
+Response is tested together with detection in a single quarterly exercise, documented in `agent-monitoring/SKILL.md` under The Quarterly Exercise. A monitor that fires into a response nobody knows how to run is not protection, so both get tested in the same session.
 
-1. Pick one failure type from the five above.
-2. Write a realistic scenario (use the examples in this document or create your own from a near-miss your team has actually experienced).
-3. Walk through the response protocol with every person who would be involved in a real incident — RevOps, the affected department head, the CRO, whoever manages the AI tool.
-4. Time each step. Note where people hesitate, where ownership is unclear, and where the protocol assumes something that isn't actually set up (e.g., "check the audit log" when no audit log exists).
-5. Fix every gap the exercise surfaces before it becomes a gap in a real incident.
+**What that exercise covers for this playbook:** walking the seven response steps with everyone who would be involved in a real incident, timing each step, and noting every hesitation, unclear ownership, and point where the protocol assumes something exists that does not.
 
-**Cadence:** Run a tabletop exercise quarterly, rotating through different failure types. After any real incident, run an exercise on a variation of that incident type within 30 days.
+**Cadence:** Quarterly, rotating through the five failure types so each gets tested at least annually. After any real incident, run a variation of that failure type within 30 days.
+
+If you have not built a detection layer yet, run the response walkthrough on its own using the scenarios in `references/tabletop-scenarios.md`. Testing response without detection is incomplete but still better than testing neither.
 
 ---
 
@@ -222,9 +223,10 @@ A playbook you haven't tested is a hypothesis. Run a tabletop exercise at least 
 |---|---|---|
 | `references/incident-log-template.md` | Every incident | Structured log for documenting the full incident lifecycle |
 | `references/post-incident-changes-log.md` | After remediation | Running log of systemic changes made after incidents |
-| `references/tabletop-scenarios.md` | Quarterly exercises | Pre-written scenarios for each failure type, ready to run |
+| `references/tabletop-scenarios.md` | Standalone response testing | Pre-written scenarios for each failure type, for walking the response protocol without a detection layer in place |
 
 ## Related Skills
 
+- **agent-monitoring** — the detection layer that catches these failures before they reach a decision. Shares the quarterly exercise with this skill.
 - **why-audit** — prevents Type 4 (confident wrong narrative) incidents by validating causal claims before they reach decisions
 - **semantic-layer-setup** — prevents Type 1 (model drift) and Type 3 (cascading errors) by ensuring metric definitions are documented and versioned
