@@ -155,7 +155,7 @@ When an incident is identified, follow this sequence. Do not skip steps.
 
 1. **Correct the data.** Fix every record the error touched. This is often the most time-consuming step because cascading errors can touch hundreds of records.
 2. **Correct the decisions.** Revisit every decision that was informed by the wrong output. Some may still be correct despite the bad input. Others need to be reversed.
-3. **Correct the system.** Implement the systemic fix identified in root cause. Log the change in `references/post-incident-changes-log.md`.
+3. **Correct the system.** Implement the systemic fix identified in root cause. Record it in the incident log under systemic fix implemented.
 
 ### Step 6: Test the Fix
 
@@ -222,7 +222,6 @@ If you have not built a detection layer yet, run the response walkthrough on its
 | File | When to read | What's inside |
 |---|---|---|
 | `references/incident-log-template.md` | Every incident | Structured log for documenting the full incident lifecycle |
-| `references/post-incident-changes-log.md` | After remediation | Running log of systemic changes made after incidents |
 | `references/tabletop-scenarios.md` | Standalone response testing | Pre-written scenarios for each failure type, for walking the response protocol without a detection layer in place |
 
 ## Related Skills
