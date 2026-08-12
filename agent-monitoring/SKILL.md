@@ -61,7 +61,7 @@ The five failure types from `agentic-incident-playbook` viewed earlier in their 
 - Distribution shift in model inputs (average deal size, segment mix, product mix) against the distribution the model was calibrated on
 - Rate at which humans override the model's output
 
-**Threshold example:** Flag when score-to-outcome correlation drops more than 15% from the calibration baseline, or when override rate exceeds 25% in a rolling month.
+**Threshold example:** Flag when score-to-outcome correlation drops more than 15% from the calibration baseline, or when override rate exceeds 15% in a rolling month.
 
 **Why this catches it early:** Drift produces no dramatic failure. Each individual output looks plausible. Only the aggregate reveals the problem, which is exactly what a rolling statistical check sees and a human reviewer does not.
 
@@ -95,7 +95,7 @@ The five failure types from `agentic-incident-playbook` viewed earlier in their 
 
 **Why anomaly detection rather than rules:** Cascading errors are, by definition, failures nobody predicted. A rule catches what you already thought to check for. Baseline deviation catches the shape of a problem you have not seen before.
 
-**Caution:** Anomaly detection produces false positives during legitimate business changes. A new product launch, a territory reassignment, or a pricing change will trip these. Every flag needs a human to distinguish a real error from a real change. See Threshold Governance below.
+**Caution:** Anomaly detection produces false positives during legitimate business changes. A new product launch, a territory reassignment, or a pricing change will trip these. Every flag needs a human to distinguish a real error from a real change. See Threshold Governance and False Positive Reduction below.
 
 ### Type 4: Confident Wrong Narrative
 
@@ -145,18 +145,66 @@ Detection is only useful if something happens when it fires.
 
 ---
 
-## Threshold Governance
+## Threshold Governance and False Positive Reduction
 
-Every detection method has a threshold set by a human. Thresholds decay.
+Every detection method has a threshold set by a human. Thresholds decay. And a check that fires constantly gets ignored, which makes it functionally worse than no check at all.
 
-**Rules:**
-- Every threshold has a named owner and a last-reviewed date
-- Thresholds are reviewed quarterly alongside the semantic layer review
-- Every check tracks how often it fired and how often the flag was a real problem
-- A check with a false positive rate above 50% gets retuned or retired. A monitor people ignore is functionally not a monitor.
-- A check that has never fired is either well-tuned or broken. The quarterly exercise is how you find out which.
+The goal is fewer flags without fewer catches. Those pull against each other, and managing that tension is the whole job of this section.
 
-**Track for each check:**
+### Disposition Every Flag
+
+No flag closes without a disposition. This is the input that everything else in this section depends on.
+
+| Disposition | Definition | What it triggers |
+|---|---|---|
+| **True positive** | A real failure. The agent produced a wrong output or took a wrong action. | Move to escalation. If it reached a decision, `agentic-incident-playbook`. |
+| **Known business change** | The deviation is real but expected. A launch, a reorg, a territory shift, a pricing change. | Log the change. Consider a suppression window (below). Feed the label back to the baseline. |
+| **Threshold artifact** | Nothing meaningfully changed. The threshold is too tight for normal variance. | Retune the threshold. Do not suppress. |
+| **Unexplained** | Cause could not be determined within the review window. | Keep open. Review at the next scheduled cycle. Never close as false positive by default. |
+
+**Rule:** unexplained is not the same as false positive. Closing unknowns as noise is how a monitoring layer trains itself into blindness. Track them separately and revisit them.
+
+### The Feedback Loop
+
+This applies to anomaly detection specifically. Deterministic checks do not learn, they get retuned by a human.
+
+Anomaly detection produces most of the false positive volume, because legitimate business change and real error look structurally similar to a baseline model. The fix is supervised: dispositions become labels, labels update the baseline.
+
+**How it works:**
+- Every flag carries its disposition back to the model
+- Patterns labeled "known business change" stop registering as anomalous when they recur in a similar shape
+- Patterns labeled "true positive" increase sensitivity to that shape
+- The baseline recalculates on a defined cadence rather than continuously, so a burst of unusual activity does not silently become the new normal before anyone reviews it
+
+**Expect a tuning period.** The first 60 to 90 days after deploying anomaly detection will produce a high false positive rate. This is not a malfunction. The model has no labeled history yet. Budget human review time accordingly and resist the urge to loosen thresholds during this window, because premature loosening bakes in blind spots before the model has learned anything.
+
+**What the loop cannot fix:** if dispositions are applied carelessly, the model learns carelessly. Garbage labels produce a model that confidently ignores real failures. Whoever dispositions flags needs enough context to distinguish a real error from a real change, which usually means RevOps rather than a rotating queue.
+
+### Suppression Windows
+
+The cheapest false positive reduction available, and it requires no model at all.
+
+When a business change is planned, tell the system to expect deviation in that window instead of letting it flag daily for two weeks.
+
+**When to open a suppression window:**
+- Product launches and sunsets
+- Pricing or packaging changes
+- Territory or segment reassignment
+- Comp plan changes
+- Large data migrations or CRM configuration changes
+- Seasonal patterns with known historical shape
+
+**Rules for suppression:**
+- Every window has a start date, an end date, and a named owner. Open-ended suppression is how monitoring quietly turns off.
+- Suppression narrows scope, it does not disable the check. Suppress the specific metric or record population affected, not the whole detection method.
+- Critical severity never suppresses. An out-of-scope agent write escalates during a product launch the same as any other day.
+- Suppressed flags are still logged, just not escalated. When the window closes, review what accumulated. If something in there was a real failure, that is a lesson about how the window was scoped.
+
+**Best practice:** build suppression into the change management process. When a launch date is set, the suppression window gets opened at the same time, by the same person, with the same end date.
+
+### Check Performance Register
+
+Track for every check:
 
 | Field | What to capture |
 |---|---|
@@ -166,9 +214,37 @@ Every detection method has a threshold set by a human. Thresholds decay.
 | Threshold | Current trigger condition |
 | Owner | One named person |
 | Last reviewed | Date |
+| Last retuned | Date, with what changed and why |
 | Times fired | Count, trailing quarter |
-| True positives | Count of flags that were real |
-| False positive rate | Calculated |
+| True positives | Count |
+| Known business change | Count |
+| Threshold artifacts | Count |
+| Unexplained | Count, currently open |
+| Precision | True positives divided by total fired |
+| Seeded failures caught | From the quarterly exercise, out of how many attempted |
+
+**Precision is the false positive metric.** A check firing 40 times with 8 true positives has 20% precision. Track it per check, not in aggregate, because one noisy check will drag an otherwise healthy suite below any threshold you set.
+
+### Retuning Rules
+
+- **Precision below 30% for two consecutive quarters:** retune the threshold or narrow the check's scope. Document what changed.
+- **Precision below 15%:** the check is actively harmful. Retire it or rebuild it. People have already stopped reading its alerts.
+- **Precision above 90% with low fire volume:** the threshold may be too tight in the other direction. Verify the check still catches seeded failures before assuming it is well-tuned.
+- **A check that has never fired:** unknown state, not a healthy one. It gets tested in the next quarterly exercise before anyone concludes it works.
+
+### The Sensitivity Guardrail
+
+Every threshold loosened to reduce noise is a real failure that might now slip through. A monitoring layer optimized only for fewer alerts will eventually optimize into catching nothing, and its precision metric will look excellent the entire time.
+
+**Three rules prevent this:**
+
+1. **Never retune a threshold without running the seeded-failure test at the new setting.** If the check no longer catches the test failure, the new threshold is wrong regardless of what it did to precision.
+
+2. **Track seeded failures caught alongside precision.** Precision measures noise. Seeded failure catch rate measures whether the check still works. A check with 95% precision that misses seeded failures is a check that stopped detecting anything.
+
+3. **Retuning is directional and reviewed.** Every threshold change is logged with what changed, why, and who approved it. A threshold that has been loosened three quarters in a row is a pattern worth questioning, and that pattern is only visible if the changes are logged.
+
+**The failure mode this prevents:** a quarter where flags dropped 60%, the team celebrates less noise, and nobody notices that two real drift events passed through unflagged. The seeded-failure test is the only thing that surfaces this before an incident does.
 
 ---
 
@@ -200,7 +276,7 @@ Run it in a test environment with seeded data. Never in production.
 
 **Step 2: Inventory every agent.** What it does, which systems it touches, what it reads, what it writes, who owns it. Anything that scores, enriches, sequences, forecasts, or generates counts.
 
-**Step 3: Map each agent to its likely failure types.** A scoring model risks drift. A sequencing agent risks unauthorized actions. An analysis agent risks confident wrong narrative and partial data. Most agents carry two or three.
+**Step 3: Map each agent to its likely failure types.** A scoring model risks drift. A sequencing agent risks unauthorized actions. An analysis agent risks confident wrong narrative and partial data. Some agents carry two or three.
 
 **Step 4: Build the deterministic checks first.** They cover the majority of failure modes, cost the least to build, and produce the fewest false positives. Drift correlation, permission auditing, coverage ratios.
 
@@ -220,7 +296,7 @@ Run it in a test environment with seeded data. Never in production.
 
 **Correlated blindness.** The monitor and the monitored system read from the same source. Bad enrichment data feeds both the scoring model and the check watching it, and both see the same wrong value. Mitigate by checking against realized outcomes rather than against upstream data.
 
-**Alert fatigue.** Too many flags, and people stop reading them. Track false positive rates and retire checks that cry wolf.
+**Alert fatigue.** Too many flags, and people stop reading them. Track precision per check and retire anything below the retuning threshold.
 
 **Threshold rot.** A check calibrated eighteen months ago against a business that no longer exists. Quarterly review with named owners is the only fix.
 
@@ -231,7 +307,7 @@ Run it in a test environment with seeded data. Never in production.
 ## Voice Rules
 
 - Label every detection method as deterministic, anomaly detection, or model-based. Never describe a scheduled query as AI.
-- State the false positive rate when reporting on a check's performance
+- State precision and seeded failure catch rate when reporting on a check's performance. Never report one without the other.
 - When a flag's cause is unknown, say unknown. Do not assign a likely cause without evidence.
 
 ---
