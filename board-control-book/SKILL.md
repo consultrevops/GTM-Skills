@@ -1,6 +1,16 @@
 ---
 name: board-control-book
-description: "Builds and maintains a standing board-ready reporting package for revenue teams — same format every cycle, AI-touch disclosed, named owners, so board conversations are about what the numbers mean rather than what the numbers are. Triggers on 'board deck,' 'board prep,' 'board reporting,' 'board meeting,' 'quarterly review,' 'investor update,' 'forecast review,' 'board-ready,' 'QBR deck,' or any request to prepare revenue metrics or narrative for board-level consumption. BOUNDARY: For validating whether AI-generated causal explanations in the report are trustworthy, see why-audit. For incident response when an AI-generated number reaches the board unchecked, see agentic-incident-playbook."
+description: >
+  Builds and maintains a standing board-ready reporting package for
+  revenue teams. Same format every cycle, AI-touch disclosed, named
+  owners, so board conversations are about what the numbers mean rather
+  than what the numbers are. Triggers on board deck, board prep, board
+  reporting, board meeting, quarterly review, investor update, forecast
+  review, board-ready, QBR deck, or any request to prepare revenue
+  metrics or narrative for board-level consumption. BOUNDARY - For
+  validating whether AI-generated causal explanations in the report are
+  trustworthy, see why-audit. For incident response when an AI-generated
+  number reaches the board unchecked, see agentic-incident-playbook.
 ---
 
 # Board Control Book — Revenue Reporting That Survives Scrutiny
