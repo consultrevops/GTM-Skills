@@ -162,15 +162,15 @@ This section is new relative to traditional control books and reflects the curre
 
 ## Building the Control Book for the First Time
 
-**Step 1: Define the metrics.** Every metric in the control book must have a documented definition — exact calculation, which fields feed it, which are excluded. If this doesn't exist, start with `why-audit` Requirement 2 (semantic layer). The control book is only as trustworthy as the definitions underneath it.
+**Step 1: Define the metrics.** Every metric in the control book must have a documented definition, including the exact calculation, which fields feed it, and which are excluded. If this doesn't exist yet, start with `semantic-layer-setup/SKILL.md`. The control book is only as trustworthy as the definitions underneath it.
 
 **Step 2: Assign ownership.** Every section has one named owner. Not a team, one person. That person is accountable for accuracy, timeliness, and variance explanations in their section.
 
-**Step 3: Establish the format with the board.** Present the structure to the board before the first live cycle and get alignment on what's included. Expect requests for additions or changes, especially in the first two cycles. The goal is to reach a stable format as quickly as possible so the board can build pattern recognition across quarters. Once stable, resist cosmetic changes, but treat board requests for new components or different breakdowns as legitimate inputs, not threats to the format. The discipline is consistency where it matters (same metric definitions, same ownership, same variance structure), not rigidity about which slides are in the deck.
+**Step 3: Establish the format with the board.** Present the structure to the board before the first live cycle and get alignment on what's included. Expect requests for additions or changes, especially in the first two cycles. The goal is to reach a stable format as quickly as possible so the board can build pattern recognition across quarters. Once stable, resist cosmetic changes, but treat board requests for new components or different breakdowns as legitimate inputs, not threats to the format. The discipline is consistency where it matters, meaning the same metric definitions, the same ownership, and the same variance structure. Not rigidity about which slides are in the deck.
 
 **Step 4: Set variance thresholds by section.** Different metrics need different thresholds. A 10% swing in ARR is a fundamentally different signal than a 10% swing in deal velocity. Work with section owners and the board to define what counts as a variance worth explaining for each component. These thresholds may change over time at the board's request as the company matures or priorities shift. Document the current thresholds and update them explicitly rather than letting them drift informally.
 
-**Step 5: Run a dry run.** Before the first live board meeting using this format, run the full package internally with the executive team 3-5 days before. Every question that comes up in the dry run is a question that would have come up in the board meeting — catch it early.
+**Step 5: Run a dry run.** Before the first live board meeting using this format, run the full package internally with the executive team 3-5 days before. Every question that comes up in the dry run is a question that would have come up in the board meeting. Catch it early.
 
 **Step 6: Add the AI disclosure log.** Audit every tool in your revenue stack. Anything that uses AI (forecasting, scoring, enrichment, sequencing, health scoring) gets logged. If you're unsure whether something uses AI, assume it does and investigate.
 
