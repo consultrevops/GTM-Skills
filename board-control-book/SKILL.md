@@ -64,10 +64,10 @@ When the format is consistent, directors stop asking what the numbers are. They 
 
 | Component | What it covers | Owner |
 |---|---|---|
-| Pipeline coverage | Current pipeline vs. target, by segment and stage, with coverage ratio | CRO / RevOps |
+| Pipeline coverage | Current pipeline vs. target, by stage, with coverage ratio | CRO / RevOps |
 | Forecast summary | Committed, best case, and upside — with movement from prior period | CRO / RevOps |
 | Stage conversion rates | Stage-to-stage conversion rates vs. historical average | CRO / RevOps |
-| Deal velocity | Average days in stage, by segment — current vs. trailing 3 quarters | CRO / RevOps |
+| Deal velocity | Average days in stage — current vs. trailing 3 quarters | CRO / RevOps |
 | Lost rates by stage | Loss rates and categorized loss reasons at each funnel and opportunity stage, broken down by source/channel, region, industry, product, and rep | CRO / RevOps |
 
 **Rules:**
@@ -91,20 +91,20 @@ When the format is consistent, directors stop asking what the numbers are. They 
 - Marketing-sourced and marketing-influenced need to be explicitly defined.
 - Marketing contribution to revenue is co-owned with the CRO because the number depends on how pipeline handoff is defined — if marketing and sales disagree on what counts as marketing-sourced, fix the definition before reporting it.
 - Channel performance is reported with enough history (trailing 3-4 quarters minimum) to show trend, not just current-period spend. A channel that looks expensive this quarter may have a longer payback cycle that only shows up over time.
-- If any lead scoring, attribution modeling, or content performance analysis uses AI, disclose it in Section 7 (AI Disclosure Log).
+- If any lead scoring, attribution modeling, or content performance analysis uses AI, disclose it in Section 8 (AI Disclosure Log).
 
 ### Section 4: Retention and Expansion
 
 | Component | What it covers | Owner |
 |---|---|---|
 | Gross and net retention | GRR and NRR — actuals vs. plan, trailing 4 quarters | CRO / CS |
-| Churn detail | Lost customers with categorized reasons (voluntary/involuntary, by segment) | CRO / CS |
+| Churn detail | Lost customers with categorized reasons (voluntary/involuntary, by company ARR range) | CRO / CS |
 | Customer health summary | Global health score with component breakdown — product usage, support, account growth, feedback, advocate scores | CRO / CS |
 | Expansion pipeline | Expansion opportunities by stage and expected close | CRO / CS |
 | Product white space | Matrix of customers by product — showing what each customer has, what they don't, and where open expansion opportunities exist | CRO / CS |
 
 **Rules:**
-- Churn reasons use a defined taxonomy, not free text only — see `why-audit/references/context-object-schema.md` for the category structure
+- Churn reasons use a defined taxonomy, not free text only — see `causal-model-setup/references/context-object-schema.md` for the category structure
 - If churn analysis or health scoring uses AI, disclose it and flag any score that triggered an action (e.g., "AI flagged this account as high-risk, CS intervened")
 - Health scores are reported as both the current snapshot and the trend (improving, stable, declining) over the trailing 2-3 quarters. A single-point score without trend context invites misinterpretation.
 - Product white space is reviewed quarterly to identify systematic expansion gaps — if 80% of customers with Product A don't have Product B, that's a strategic finding, not just a rep-level upsell list
@@ -113,23 +113,63 @@ When the format is consistent, directors stop asking what the numbers are. They 
 
 | Component | What it covers | Owner |
 |---|---|---|
-| CAC | Customer acquisition cost — total and marketing percentage of CAC, broken down by source/channel, segment, and product where possible | CFO / CRO |
+| CAC | Customer acquisition cost — total and marketing percentage of CAC, broken down by source/channel, company ARR range, and product where possible | CFO / CRO |
 | CLTV | Customer lifetime value — current calculation and trailing trend | CFO / CRO |
 | CLTV:CAC ratio | Ratio of lifetime value to acquisition cost — actuals vs. target | CFO / CRO |
-| CAC payback period | Months to recover acquisition cost, by segment | CFO / CRO |
+| CAC payback period | Months to recover acquisition cost, by company ARR range | CFO / CRO |
 
 **Rules:**
 - CAC should include sales and marketing costs at minimum. More mature models add customer support cost for renewing customers — disclose which costs are included so the board knows what's in the number
 - CLTV:CAC ratio is compared against the org's own historical trend, not a generic "3:1 is good" benchmark, unless the board specifically requests a benchmark comparison
-- If CAC or CLTV calculations use AI-assisted attribution models, disclose it in Section 7 (AI Disclosure Log)
+- If CAC or CLTV calculations use AI-assisted attribution models, disclose it in Section 8 (AI Disclosure Log)
 
-### Section 6: Variance Narrative
+### Section 6: Cohort Performance and Outliers
+
+**Owner: RevOps**
+
+Every metric in Sections 1 through 5 is a blend. A blend can be healthy while a cohort is failing, and it can look bad while most of the business is fine and one cohort is dragging it down. Those situations call for opposite responses, and the blended number cannot distinguish them.
+
+This section reports what the blend hides.
+
+| Component | What it covers | Owner |
+|---|---|---|
+| Cohort outliers | Cohorts deviating materially from the blended metric, in either direction, with the size of the gap | RevOps |
+| Best performing | The cohort outperforming the blend by the widest margin on each key metric, with what is known about why | RevOps |
+| Worst performing | The cohort underperforming by the widest margin, with what is known about why | RevOps |
+| Emerging divergence | Cohorts trending away from the blend over the trailing 3-4 quarters, even where the current gap is not yet material | RevOps |
+
+**Cohort dimensions by section:**
+
+| Section | Cut by |
+|---|---|
+| Pipeline and Forecast | Company ARR range, product, rep, source/channel, industry |
+| Marketing Performance | Source/channel, campaign type, company ARR range, industry |
+| Retention and Expansion | Company ARR range, industry, product, tenure |
+| Unit Economics | Company ARR range, source/channel, product, industry |
+
+**Rules:**
+
+- **Set a minimum cohort size before reporting.** Small cohorts produce large percentage swings from single events. One churned account in a twelve-account cohort moves retention enormously without meaning anything. Define the minimum per metric and state it. 
+
+- **Define what "material" means and hold it constant.** A cohort deviating from the blend by less than the threshold is noise. Set the threshold per metric, document it, and do not adjust it between cycles to make a cohort appear or disappear.
+
+- **Report both directions.** Outperforming cohorts are as informative as underperforming ones and get skipped far more often. A cohort beating the blend by 15 points is either something to replicate or something to check for a measurement problem.
+
+- **Separate surfacing from explaining.** Identifying that mid-market NRR sits 13 points below blended is retrieval. AI is reliable at it. Explaining why is causal, and it requires the causal model, semantic layer, context object, and data readiness underneath it. See `why-audit/SKILL.md`. State which cohort gaps have a validated explanation and which are open questions.
+
+- **Open questions are a legitimate output.** "Enterprise deal velocity is 40% slower than blended and we have not determined why, analysis due by [date], owned by [name]" is a complete entry. Inventing a cause to avoid an unexplained gap is the failure this whole control book is built to prevent.
+
+- **Carry material gaps into Section 7.** Any cohort gap large enough to change a decision gets a full variance narrative, not just a line in this table.
+
+- **If cohort analysis uses AI, disclose it in Section 8.** Note which numbers were AI-generated and whether any causal explanation attached to them passed the why-audit. Using AI effectively will make this section go much faster.
+
+### Section 7: Variance Narrative
 
 This is the section most teams skip or fill with vague language. It's the most important section in the control book.
 
 **Structure for every variance explanation:**
 
-1. **What happened.** The actual change, stated plainly. "Win rate dropped 8 points in enterprise segment between Q1 and Q2."
+1. **What happened.** The actual change, stated plainly. "Win rate dropped 8 points in enterprise cohort between Q1 and Q2."
 
 2. **Why it happened.** The mechanism — not "macro headwinds," but the specific factors. "Three of the five losses were deals where the champion changed roles mid-cycle. The other two were competitive losses to [competitor] on pricing." If this explanation was informed by an AI-generated analysis, it must pass the why-audit before inclusion. See `why-audit/SKILL.md`.
 
@@ -142,7 +182,7 @@ This is the section most teams skip or fill with vague language. It's the most i
 - If the explanation uses language from the false-confidence-markers list (`why-audit/references/false-confidence-markers.md`), it needs to be rewritten before it reaches the deck.
 - The narrative is owned by a named person, not generated by a tool. AI can inform it. A human writes it and stands behind it.
 
-### Section 7: AI Disclosure Log
+### Section 8: AI Disclosure Log
 
 This section is new relative to traditional control books and reflects the current reality that AI is touching revenue data in most organizations.
 
@@ -198,10 +238,11 @@ This section is new relative to traditional control books and reflects the curre
 | File | When to read | What's inside |
 |---|---|---|
 | `references/control-book-template.md` | First-time setup | A blank template with all sections, ready to fill |
-| `references/variance-explanation-examples.md` | Writing Section 6 | Good and bad examples of variance explanations |
+| `references/variance-explanation-examples.md` | Writing Section 7 | Good and bad examples of variance explanations |
 
 ## Related Skills
 
 - **why-audit** — validates any AI-generated causal claim before it enters the variance narrative
+- **causal-model-setup** — builds the causal model and context object that support cohort explanations in Section 6 and variance narratives in Section 7
 - **agentic-incident-playbook** — response protocol when an AI-generated error reaches a board or decision
 - **semantic-layer-setup** — builds the metric definitions the control book depends on
