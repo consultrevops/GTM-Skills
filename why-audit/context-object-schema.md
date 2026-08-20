@@ -1,6 +1,6 @@
 # Context Object Schema
 
-This document defines the structure for a non-deal-specific context object — a structured place where subjective, environmental, and organizational factors that affect revenue outcomes are logged. This is Requirement 3 in the Four Requirements Scorecard.
+This document defines the structure for a non-deal-specific context object — a structured place where subjective, environmental, and organizational factors that affect revenue outcomes are logged. It holds the contextual causal factors that causal-model-setup/SKILL.md weights, and satisfies Requirement 3 in the why-audit scorecard.
 
 Most CRMs capture what happened inside a deal. This object captures what happened around it.
 
@@ -51,7 +51,7 @@ Each entry must be tagged with exactly one category. These are intentionally bro
 
 | Category | What belongs here | Examples |
 |---|---|---|
-| **Competitor Move** | A competitor changed pricing, positioning, product, or GTM approach in a way that could affect your pipeline or retention | "Competitor X launched a free tier targeting our SMB segment"; "Competitor Y hired away our former VP Sales" |
+| **Competitor Repositions** | A competitor changed pricing, positioning, product, or GTM approach in a way that could affect your pipeline or retention | "Competitor X launched a free tier targeting our SMB segment"; "Competitor Y hired away our former VP Sales" |
 | **Enablement Change** | An internal change to how reps sell — pitch, messaging, demo flow, objection handling, onboarding, training | "New pitch deck rolled out week of June 3"; "Objection-handling training completed for enterprise team" |
 | **Pricing or Packaging Change** | Any change to how your product is priced, packaged, discounted, or bundled | "Removed annual discount for new customers starting July 1"; "Added usage-based pricing tier for mid-market" |
 | **Team Change** | Hiring, departures, reorgs, territory reassignments, capacity shifts, or burnout signals that affect revenue execution | "Lost 2 senior AEs in enterprise segment"; "SDR team reassigned from outbound to inbound for Q3" |
@@ -59,6 +59,8 @@ Each entry must be tagged with exactly one category. These are intentionally bro
 | **Product Change** | Changes to your own product that affect how it sells, retains, or expands — feature launches, deprecations, reliability issues | "Core integration with Salesforce broke for 3 days in week 2"; "New reporting feature launched, early signal of strong expansion interest" |
 | **Process Change** | Changes to internal revenue processes — lead routing, handoff procedures, approval workflows, stage definitions | "Revised MQL definition effective August 1"; "Added VP approval gate for discounts over 20%" |
 | **Strategic Decision** | Leadership decisions that affect revenue direction but don't fit neatly into other categories | "CEO decided to deprioritize SMB segment for Q4"; "Board requested pivot toward enterprise" |
+
+These categories are the contextual causal factors the causal model weights. If you add or rename a category, update the guardrail ranges in weighting-governance-log.md in the same change. A category with no guardrail range has no cap.
 
 ---
 
@@ -89,10 +91,28 @@ Each entry must be tagged with exactly one category. These are intentionally bro
 
 ---
 
-## How This Connects to the Why Audit
+## How AI Uses the Confidence Field
 
-When running a why-audit (see `SKILL.md`), Requirement 3 is scored based on this object:
+The confidence field changes how an entry can be used in a causal answer. It is not decoration.
 
-- **Present:** This object exists, is actively maintained (updated within the last 30 days), has entries across at least 4 of the 8 categories, and the AI can read it when generating causal answers.
-- **Partial:** Some context is captured but not in a structured, searchable form — living in Slack, meeting notes, or a leader's memory. Or the object exists but hasn't been updated in 60+ days.
-- **Missing:** No structured capture of non-deal context. The AI reasons over deal-level CRM data only.
+**Disclose it.** When an AI-generated explanation references a context entry, it states the entry's confidence level and source alongside the claim. "This coincides with a competitor repositioning logged October 3 (Probable, sourced from rep feedback)" rather than presenting it as established fact.
+
+**Weight it.** Confirmed entries carry more weight than Probable, which carry more than Speculative. A Speculative entry cannot exceed half its category's maximum share of the contextual allocation, regardless of who is running the analysis. See `weighting-governance-log.md`.
+
+**Never let Speculative carry a causal claim alone.** If the only support for an explanation is a Speculative entry, the correct output is that the cause is unconfirmed. Naming the speculative factor as the cause is exactly the failure mode this object was built to prevent.
+
+**Flag heavy reliance.** When an analysis depends materially on an entry below Confirmed, say so explicitly. That flag is a prompt for a human to verify the entry, upgrade its confidence, or retire it.
+
+**AI does not upgrade confidence.** An agent can propose that an entry looks confirmable and cite what would confirm it. Only a human changes the field.
+
+---
+
+## How This Connects to Other Skills
+
+**causal-model-setup:** the categories in this object are the contextual causal factors the model weights. The confidence field feeds the weighting cap. The `effective_date` determines which entries are in scope for a given period's analysis.
+
+**why-audit:** Requirement 3 is scored based on this object.
+
+- **Present:** exists, actively maintained (updated within the last 30 days), has entries across at least 4 of the 8 categories, and the AI can read it when generating causal answers.
+- **Partial:** some context is captured but not in a structured, searchable form. Living in Slack, meeting notes, or a leader's memory. Or the object exists but hasn't been updated in 60+ days.
+- **Missing:** no structured capture of non-deal context. The AI reasons over deal-level CRM data only.
