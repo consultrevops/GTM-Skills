@@ -2,7 +2,7 @@
 
 Four records. The structural weight register, which holds the agreed encoding of how this business works. The guardrail ranges, which bound contextual weighting. The contextual run log, which captures every analysis run under non-default weighting. And the approval record, which documents what leadership actually agreed to.
 
-All four exist for the same reason. A causal model that nobody can audit is a model that produces whatever the person running it wanted.
+All four exist for the same reason. A causal model that nobody can audit is an unproved model.
 
 ---
 
@@ -28,8 +28,8 @@ The structural and contextual split is a structural decision and lives at the to
 |---|---|
 | **Factor** | The structural causal factor. Champion engagement change, deal size mix shift, stage velocity, rep tenure, activity levels, discount depth, product mix, source and channel. |
 | **Cohort** | Where this weight applies. Company ARR range, product, motion, or All. |
-| **Weight** | The value, on whatever scale your model uses. Be consistent. |
-| **Basis** | Evidence-based or starting assumption. Say which. |
+| **Weight** | The value, on whatever scale your model uses. Most will be out of 100%, but low/medium/high are used for the examples below. |
+| **Basis** | Evidence-based or starting assumption. |
 | **Evidence** | What supports this weight. A loss analysis, a cohort comparison, a win/loss interview pattern. If the basis is assumption, write the reasoning instead. |
 | **Approved by** | Named people, not roles. The revenue leaders whose narratives run on this. |
 | **Approved date** | |
@@ -44,11 +44,11 @@ The structural and contextual split is a structural decision and lives at the to
 | Stage velocity | All | Medium | Starting assumption | No isolated evidence yet. Velocity correlates with outcome but has not been separated from deal size effects. Flagged for evidence at next review. | J. Okafor (CRO) | 2026-04-12 | 2026-07-15 |
 | Discount depth | $100K-$250K ARR | Medium | Evidence-based | Deals discounted above 20% closed at 34% vs 29% at lower discounts, but with 11% lower ACV. Net effect roughly neutral. | J. Okafor (CRO), D. Lin (CFO) | 2026-06-30 | 2026-07-15 |
 
-**On the basis column:** a register where every weight says evidence-based is a register nobody was honest about. Most models start mostly assumption. Marking that plainly is what makes the review meaningful, because starting assumptions are the queue of things to go find evidence for.
+**On the basis column:** most models will have a mix of assumptions and evidence-based values for Basis. It's best to be honest about what is assumption-based because it makes the review more meaningful and based in reality. Starting assumptions are the queue of things to go find evidence for.
 
 ### Structural change log
 
-Every change to a structural weight or to the split. No exceptions.
+Log every change to a structural weight or to the split.
 
 | Date | What changed | From | To | Reason | Approval-by-example run? | Approved by |
 |---|---|---|---|---|---|---|
@@ -61,9 +61,9 @@ Every change to a structural weight or to the split. No exceptions.
 
 ## Part 2: Guardrail Ranges
 
-Bounds on how much any single contextual causal factor can contribute within the contextual portion of the model. Set by the administrator, approved by leadership, varied by nobody.
+Bounds on how much any single contextual causal factor can contribute within the contextual portion of the model. Set by the administrator and approved by leadership.
 
-These are expressed as a share of the contextual allocation. At a 70/30 split, a factor capped at 40% of contextual can contribute at most 12% of the total explanation.
+These are expressed as a share of the contextual allocation. At a 70/30 split, a factor capped at 40% of contextual can contribute at most 12% of the total explanation, because 30 * 40% = 12.
 
 | Contextual factor | Min share | Max share | Notes |
 |---|---|---|---|
@@ -73,7 +73,7 @@ These are expressed as a share of the contextual allocation. At a 70/30 split, a
 | Team Change | 0% | 40% | Capped for the same reason. |
 | Market Shift | 0% | 30% | Capped deliberately. This is the category most often used to externalize an internal cause. |
 | Product Change | 0% | 100% | Full range. |
-| Process Change | 0% | 40% | |
+| Process Change | 0% | 40% | Capped. Territory reassignments, routing changes, and approval workflow changes are real disruptions, but their effect usually shows up as a temporary dip rather than a sustained cohort-wide shift. |
 | Strategic Decision | 10% | 100% | Cannot be zeroed. A deliberate leadership decision that affected revenue is not optional context. |
 
 **Two design principles behind the caps:**
