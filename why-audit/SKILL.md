@@ -27,7 +27,7 @@ Every revenue question is either **retrieval** or **causal**.
 
 **Causal:** "Why is our churn rate up this quarter?" The answer requires identifying which of several possible causes actually drove the outcome, ruling out others, and weighting the ones that remain.
 
-Retrieval questions are safe to trust from AI. Causal questions are not — not because AI reasons badly, but because generating a plausible-sounding explanation and generating a verified one are different tasks, and most AI-generated "why" answers are only doing the first one.
+Retrieval questions are safe to trust from AI (as long as there's a semantic layer). Causal questions are not — not because AI reasons badly, but because generating a plausible-sounding explanation and generating a verified one are different tasks, and most AI-generated "why" answers are only doing the first one.
 
 ---
 
@@ -37,7 +37,7 @@ Before treating any AI-generated "why" as reliable, check whether these four thi
 
 **1. A causal model.** Does something tell the AI how to weight probable causes and distinguish correlation from causation, or is it free-associating from whatever correlated signals happen to be nearby? Without this, the AI can't tell you a champion leaving is more or less likely to matter than a competitor's price change — it just mentions both.
 
-**2. A semantic layer.** Does the AI know precisely how the metric in question (churn, win rate, pipeline coverage) is calculated, and which fields feed it? Without this, "why is churn up" gets answered against an inconsistent or undefined version of churn.
+**2. A semantic layer.** Does the AI know precisely how the metric in question (churn, win rate, pipeline coverage) is calculated, and which fields feed it? Without this, "why is churn up" gets answered against an inconsistent or undefined version of churn. Additionally, with out this, retrieval questions will also likely be answered incorrectly.
 
 **3. A context object for judgment calls.** Is there a place — separate from deal-specific CRM fields — where subjective, non-deal-specific context lives? Team burnout, a competitor's repositioning, an internal enablement change. This is the layer most CRMs never capture, and it's usually where the real cause is hiding. See `references/context-object-schema.md`.
 
