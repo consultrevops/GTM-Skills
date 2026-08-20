@@ -9,7 +9,8 @@ description: >
   ARR, what fields feed this report, or any situation where AI is
   answering questions about revenue metrics without a documented
   definition underneath. BOUNDARY - For validating AI-generated causal
-  answers that depend on this layer, see why-audit.
+  answers that depend on this layer, see why-audit. For the causal model
+  that reasons on top of it, see causal-model-setup.
 ---
 
 # Semantic Layer Setup — The Definitions AI Needs Before It Can Reason About Your Revenue
@@ -162,7 +163,7 @@ For every metric you've defined, trace it back to the actual fields in the sourc
 
 ### Step 5: Set AI access boundaries
 
-Review every field in the documentation and explicitly decide: can AI read this? Can AI write to it? Fields containing PII (GDPR), compensation data, or sensitive internal notes should be restricted by policy, not left to whatever the integration defaults to.
+Review every field in the documentation and explicitly decide: can AI read this? Can AI write to it? Fields containing PII (GDPR), compensation data, or sensitive internal notes should be restricted by policy, not left to whatever the integration defaults to. This column also serves as the permission baseline for agent monitoring. A field with no documented AI access decision cannot be monitored for unauthorized writes, because there is nothing to compare against.
 
 ### Step 6: Build standing prompts
 
@@ -193,6 +194,8 @@ Set a recurring calendar event for the glossary review. Assign the overall seman
 - **why-audit** Requirement 2 (Semantic Layer) is scored based on whether this layer exists. A "Present" score means the glossary, field mapping, standing prompts, and ownership/versioning are all in place and current. "Partial" means some exist but are incomplete, outdated, or not connected to AI tools. "Missing" means AI is inferring metric definitions on its own.
 - **board-control-book** Step 1 says to start here if metric definitions don't exist. Every section of the control book depends on consistent metric definitions — the semantic layer is the foundation the entire reporting architecture is built on.
 - **agentic-incident-playbook** lists this skill as a preventive measure against Type 1 (model drift) and Type 3 (cascading errors). Documented, versioned definitions make drift detectable and reduce the surface area for cascading data problems.
+- **causal-model-setup** requires this layer as a prerequisite. A causal model reasons about why a metric moved, which requires knowing exactly what the metric is and which fields produce it.
+- **agent-monitoring** requires this layer as a prerequisite. Drift detection compares outputs against documented definitions, and unauthorized action monitoring compares agent writes against the AI access column in the field documentation.
 
 ---
 
@@ -214,6 +217,8 @@ Set a recurring calendar event for the glossary review. Assign the overall seman
 
 ## Related Skills
 
+- **causal-model-setup** — required prerequisite relationship. Builds the weighted causal model that reasons on top of these definitions.
+- **agent-monitoring** — required prerequisite relationship. Uses these definitions as the baseline for drift detection and the AI access column for permission monitoring.
 - **why-audit** — depends on this layer for Requirement 2 (Semantic Layer) scoring
 - **board-control-book** — depends on this layer for consistent metric definitions across all sections
 - **agentic-incident-playbook** — references this layer as a preventive measure against model drift and cascading errors
