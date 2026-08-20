@@ -213,7 +213,7 @@ Contextual weighting creates a real risk: sales runs one weighting, marketing ru
 
 **Step 7: Build the context object.** See `references/context-object-schema.md`. Backfill at least the last two quarters so the model has something to reason over. A context object with no history cannot inform an analysis of a period that predates it.
 
-**Step 8: Run approval by example.** The six-step process above. Do not skip the alternatives step.
+**Step 8: Run approval by example.** The seven-step process above. Do not skip the alternatives step.
 
 **Step 9: Set contextual guardrail ranges.** Minimum and maximum share of the contextual allocation for each category. Document the reasoning behind every cap. See `references/weighting-governance-log.md`.
 
@@ -245,7 +245,7 @@ Contextual weighting creates a real risk: sales runs one weighting, marketing ru
 
 **No default weighting.** Without a standing baseline, every run is an alternative and nothing is comparable across quarters.
 
-**Contextual weighting used to reach a conclusion.** Flexibility in contextual weighting should be used as a tool help discover the truth about the revenue narrative. It should not be used for self-benefiting reasons. 
+**Contextual weighting used to reach a conclusion.** Flexibility in contextual weighting should be used as a tool to help discover the truth about the revenue narrative. It should not be used for self-benefiting reasons. 
 
 **AI writing to the context object.** An agent that logs its own context and then weights it has no external check at all.
 
@@ -266,8 +266,8 @@ Contextual weighting creates a real risk: sales runs one weighting, marketing ru
 
 | File | When to read | What's inside |
 |---|---|---|
-| `references/context-object-schema.md` | Step 5 | Field-level schema for the context object, categories, confidence rules, and how AI uses them |
-| `references/weighting-governance-log.md` | Step 8 | Templates for the structural weight register and the contextual run log |
+| `references/context-object-schema.md` | Steps 3 and 7 | Field-level schema for the context object, categories, confidence rules, and how AI uses them |
+| `references/weighting-governance-log.md` | Steps 9 and 10 | Templates for the structural weight register and the contextual run log |
 
 ## Related Skills
 
