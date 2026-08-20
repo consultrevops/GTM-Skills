@@ -31,37 +31,91 @@ A causal model does two things. It encodes how this business actually works, whi
 
 ---
 
-## Two Kinds of Weights
+## Two Kinds of Causal Factors
 
 The distinction is the foundation of this skill. Conflating them is how causal models become manipulable.
 
-### Structural weights
+### Structural causal factors
 
-**What they encode:** how much a given factor typically matters in this business, by segment, deal size, product, or motion. Champion departure weighted heavier than a minor pricing concession for enterprise, but not for SMB. Competitive displacement weighted heavier in one vertical than another.
+**What they are:** factors observable in your systems. The CRM, the BI layer, and the call platform already know about these. They're already logged.
 
-**Who sets them:** RevOps, or whoever holds system administration for the causal model.
+- Champion or stakeholder engagement change
+- Deal size and segment mix shift
+- Stage velocity and where deals stall
+- Rep tenure and ramp status
+- Activity levels and multi-threading depth
+- Discount depth and approval path
+- Product mix
+- Source and channel
 
-**Who approves them:** leadership, by example rather than by number. See Approval by Example below.
+**Who weights them:** RevOps, or whoever holds system administration for the causal model.
+
+**Who approves the weights:** leadership, by example rather than by number. See Approval by Example below.
 
 **How often they change:** rarely. Fine-tuning after a review, or a genuine shift in how the business operates. A structural weight that changes quarterly was not a structural weight.
 
-**What they are not:** an opinion about a specific quarter. If a weight is being changed because of one bad quarter, that is a contextual judgment wearing structural clothing.
+### Contextual causal factors
 
-### Contextual weights
+**What they are:** factors only observable because a human logged them. These live in the context object and do not exist anywhere in your systems otherwise.
 
-**What they encode:** how much a specific logged event should count toward explaining a specific outcome. A competitor released a feature in April. Two AEs left in May. Pricing changed in March. Each of those is an entry in the context object, and how heavily each one bears on this quarter's decline is a judgment.
+- Competitor repositions product
+- Pricing or packaging changes
+- Enablement changes
+- Team capacity and morale
+- Market shifts
+- Product changes and outages
+- Process changes
+- Strategic decisions
 
-**Who sets them:** a leader running analysis, within bounds the administrator defined.
+**Who weights them:** RevOps or a system admin recommends and sets the bounds in the systems after leadership approves the bounds. See Approval by Example below. A leader running analysis varies within the bounds when running analysis.
 
 **How often they change:** deliberately and often, during analysis. That is the point.
 
 **What they are for:** testing how a conclusion moves under different reasonable assumptions. Two experienced people disagreeing about the cause is common and usually neither is wrong. They are weighting the same facts differently. Contextual weighting makes that disagreement testable instead of arguable.
+
+### The dividing line
+
+Structural is what your systems know. Contextual is what someone had to write down.
+
+Champion engagement dropping is structural, because activity data shows it. A competitor releasing a compliance module in April is contextual, because nothing in your CRM records that. Deal velocity slowing is structural. The pricing change that may have slowed it is contextual.
+
+This matters because the two have different failure modes. Structural factors are reliable but incomplete, since your systems only capture what they were built to capture. Contextual factors fill that gap but depend entirely on someone having logged them accurately, which is why the context object has a confidence field.
 
 ### Why the split matters
 
 If everything is adjustable, the model produces whatever the person running it wants. If nothing is adjustable, genuine disagreement gets resolved by whoever has the most authority in the room rather than by evidence.
 
 Structural weights are the shared, agreed, slow-moving encoding of how the business works. Contextual weights are the fast, exploratory layer on top, bounded so exploration cannot become fabrication.
+
+---
+
+## The Structural and Contextual Split
+
+Before weighting individual factors, set the overall split between the two categories.
+
+**Suggested baseline: 70% structural, 30% contextual.**
+
+Seventy percent of a causal explanation comes from patterns observable in your data. Thirty percent comes from environmental context a human recorded. That ratio reflects a simple reality: your systems capture a lot, but they do not capture why a competitor's move mattered or that the enterprise AEs are overworked compared to the SMB AEs.
+
+**When there are no context records, the split is 100/0.** The model reasons from structural factors alone, and the output must state that no contextual records existed for the period analyzed. That absence is itself a finding. A quarter with no logged context is a quarter where nobody wrote down what was happening around the numbers.
+
+**Customize the split for your business.** The baseline is a starting point, not a standard.
+
+**Weight contextual higher when:**
+- The context object has been maintained consistently for a year or more
+- Entries are mostly Confirmed rather than Speculative
+- Your market moves fast enough that environmental factors genuinely drive outcomes
+- Your CRM data is thin, so structural factors have less to work with
+
+**Weight structural higher when:**
+- The context object is new or sparsely populated
+- Entries skew Speculative
+- Your CRM and call data are rich and well-maintained
+- Your business is stable enough that most variance is internally explainable
+
+**Review the split quarterly** alongside the structural weight register. A context object that has matured over four quarters justifies a different split than the one you set when it was empty.
+
+**The split is a structural decision, not a contextual one.** It is set by RevOps, approved by leadership through the same approval-by-example process, and logged in the structural weight register. A leader running analysis varies weights within the contextual 30%. They do not change the 30% itself.
 
 ---
 
@@ -79,25 +133,38 @@ Full schema in `references/context-object-schema.md`. In brief, each entry captu
 
 ## Approval by Example
 
-Leadership cannot meaningfully approve a number. Nobody can evaluate whether champion departure should be weighted 0.4 or 0.6 in the abstract.
+Leadership cannot meaningfully approve a weighting without an output. Nobody can evaluate whether champion disengagement should be weighted 0.1 or 0.2 in the abstract. Show them how a real past quarter would have been explained under the proposed configuration, and they can tell you whether that explanation matches what they believe actually happened.
 
-Leadership can meaningfully approve an output. Show them how a real past quarter would have been explained under the proposed weighting, and they can tell you whether that explanation matches what they believe actually happened.
+**What gets approved:** three things, not one.
+
+- The structural and contextual split
+- The structural weights
+- The contextual guardrail ranges
+
+Leadership approves all three, because all three shape the answer. A defensible set of structural weights paired with an uncapped market shift category still produces a model that can externalize any uncomfortable finding.
 
 **The process:**
 
-1. **Draft the structural weights.** RevOps proposes, based on historical patterns and domain knowledge.
+1. **Draft the configuration.** RevOps proposes the split, the structural weights, and the guardrail ranges. Structural weights come from historical patterns and domain knowledge. Guardrails come from a judgment about which categories could be used to avoid an internal cause.
 
-2. **Run them against known quarters.** Pick two or three past periods where leadership already agrees on what happened. Generate the causal answer the model would have produced.
+2. **Capture leadership's understanding first.** Before showing any model output, ask the revenue leaders what they believe caused the outcome in two or three past quarters. Write it down. This has to happen before they see the model, or you are testing whether they will agree with a plausible explanation rather than whether the model is right.
 
-3. **Compare to what leadership believes.** If the model's explanation of a known quarter doesn't match the shared understanding of that quarter, the weights are wrong. This is the actual test.
+3. **Run the model against those quarters.** Generate the causal answer the configuration would have produced, using the context records that existed at the time. If no context records exist for the period, run it structural-only and say so.
 
-4. **Show the alternatives.** Present the same quarter under two or three different weightings, so leadership sees what they are choosing between rather than approving in isolation.
+4. **Compare.** If the model's explanation of a known quarter doesn't match the shared understanding of that quarter, something is wrong. Either the weights are wrong, or the shared understanding was. Both are worth finding out.
 
-5. **Get explicit agreement.** Named sign-off from the revenue leaders whose narratives will be built on this model. Log who agreed and when.
+5. **Show the alternatives.** Present the same quarter under two or three different configurations so leadership sees what they are choosing between rather than approving in isolation. Vary one thing at a time.
 
-6. **Re-run at review.** Structural weights are reviewed on a defined cadence. Same process, run against a recent quarter.
+   - A different split, such as 60/40 against 70/30, to show how much environmental context is allowed to explain
+   - A different structural weighting, such as champion disengagement High against Medium for enterprise
 
-**Why step 3 is the important one:** a causal model that explains the past incorrectly will explain the present incorrectly. Testing against quarters where the answer is already known is the only validation available before the model is used on a quarter where it isn't.
+6. **Get explicit agreement on all three.** Named sign-off from the revenue leaders whose narratives will run on this model. Record what they approved, not just that they approved.
+
+7. **Re-run at review.** Same process against a recent quarter. As the context object matures, expect the split to be the thing most likely to change.
+
+**Why step 4 is the important one:** a causal model that explains the past incorrectly will explain the present incorrectly. Testing against quarters where the answer is already known is the only validation available before the model is used on a quarter where it isn't.
+
+**Why step 5 matters more than it looks:** approving a configuration in isolation is approving whatever was put in front of you. Approving it against alternatives is a decision. The difference shows up later, when a director asks whether other explanations were considered and there is a real answer.
 
 ---
 
@@ -107,7 +174,7 @@ Contextual weighting exists to test assumptions. It must not become a way to pro
 
 **Bounded ranges.** The administrator sets minimum and maximum weights for each context category. A leader can vary within the range. They cannot zero out a Confirmed pricing change or weight a Speculative rumor as the dominant cause.
 
-**Every run is logged.** Who ran it, what weights they set, when, and what the output was. A weighting run the day before a board meeting that differs materially from the standing configuration is visible rather than silent.
+**Every run is logged.** Who ran it, what weights they set, when, and what the output was. If a weighting changes the day before a board meeting and it differs materially from the standing configuration, then it is visible (to system admins and leadership) rather than silent.
 
 **Weights are stated in the output.** Any causal answer produced under non-default weighting says so. "Under a weighting that emphasizes competitive displacement over pricing" is part of the answer, not a footnote.
 
@@ -124,7 +191,7 @@ Contextual weighting creates a real risk: sales runs one weighting, marketing ru
 **Rules:**
 
 - **Structural weights are shared and singular.** There is one model. Teams do not maintain their own.
-- **One weighting goes in the deck.** Exploration is fine and encouraged. Publication is singular.
+- **One weighting goes in the board deck.** Exploration is fine and encouraged. Publication is singular.
 - **Disagreement is surfaced, not resolved by volume.** If two teams reach different conclusions under different weightings, that is a finding worth reporting, not a conflict to settle offline. "Under weighting A the cause reads as competitive, under weighting B it reads as pricing, and we have not yet determined which is right" is an honest board statement.
 - **The variance narrative names its weighting.** If a control book variance explanation was informed by a causal model run, state the weighting used. See `board-control-book/SKILL.md` Section 6.
 
@@ -132,23 +199,27 @@ Contextual weighting creates a real risk: sales runs one weighting, marketing ru
 
 ## Building the Causal Model
 
-**Step 1: Confirm the semantic layer exists.** Metric definitions and field documentation. Without them, the model is reasoning about undefined quantities.
+**Step 1: Confirm the semantic layer exists.** Metric definitions and field documentation. Without them, the model is reasoning about undefined quantities. See `semantic-layer-setup/SKILL.md`.
 
-**Step 2: Inventory your causal factors.** What actually explains revenue outcomes in this business? Start from your own closed-lost analysis, churn reasons, and win/loss interviews rather than a generic list. Typical categories: champion or stakeholder change, pricing and packaging, competitive activity, product gaps, rep performance and tenure, enablement changes, market and timing, process changes.
+**Step 2: Inventory your structural causal factors.** What in your systems explains revenue outcomes? Start from your own closed-lost analysis, churn reasons, and win/loss interviews rather than a generic list. The list in Two Kinds of Causal Factors is a starting point. Add what your data actually shows and cut what it does not support.
 
-**Step 3: Segment the factors.** The same factor matters differently by segment, deal size, product, and motion. Champion departure is close to fatal in a twelve-month enterprise cycle and often survivable in a thirty-day SMB cycle. Document where each factor's weight varies.
+**Step 3: Inventory your contextual causal factors.** What affects outcomes that your systems will never capture? These become the categories in your context object. See `references/context-object-schema.md`. If a factor you list here turns out to be observable in a system, move it to the structural list. Contextual should only hold what genuinely requires a human to record it.
 
-**Step 4: Draft structural weights.** Base them on evidence where you have it. Historical loss analysis, cohort comparisons, anything where you can observe the factor's association with outcomes. Where you have no evidence, say so and mark the weight as a starting assumption to be revisited.
+**Step 4: Set the structural and contextual split.** Start at 70/30 and adjust for the maturity of your context object and the volatility of your market. Document the reasoning. If you have no context object yet, the split is 100/0 until you do.
 
-**Step 5: Build the context object.** See `references/context-object-schema.md`. Backfill at least the last two quarters so the model has something to reason over.
+**Step 5: Segment the structural factors.** The same factor matters differently by segment, deal size, product, and motion. Champion disengagement is close to fatal in a twelve-month enterprise cycle and often survivable in a thirty-day SMB cycle. Document where each factor's weight varies.
 
-**Step 6: Run approval by example.** The six-step process above. Do not skip the alternatives step.
+**Step 6: Draft structural weights.** Base them on evidence where you have it. Historical loss analysis, cohort comparisons, anything where you can observe the factor's association with outcomes. Where you have no evidence, say so and mark the weight as a starting assumption to be revisited.
 
-**Step 7: Set contextual guardrail ranges.** Minimum and maximum for each category. Document the reasoning.
+**Step 7: Build the context object.** See `references/context-object-schema.md`. Backfill at least the last two quarters so the model has something to reason over. A context object with no history cannot inform an analysis of a period that predates it.
 
-**Step 8: Configure logging.** Every weighting run captured with who, what, when, and output.
+**Step 8: Run approval by example.** The six-step process above. Do not skip the alternatives step.
 
-**Step 9: Define the review cadence.** Structural weights quarterly at minimum, alongside the semantic layer review.
+**Step 9: Set contextual guardrail ranges.** Minimum and maximum share of the contextual allocation for each category. Document the reasoning behind every cap. See `references/weighting-governance-log.md`.
+
+**Step 10: Configure logging.** Every weighting run captured with who, what weights, when, and what output it produced. A model nobody can audit is a model that produces whatever the person running it wanted.
+
+**Step 11: Define the review cadence.** Structural weights and the split reviewed quarterly at minimum, alongside the semantic layer review. Contextual run log reviewed quarterly for patterns.
 
 ---
 
@@ -160,7 +231,7 @@ Contextual weighting creates a real risk: sales runs one weighting, marketing ru
 - A leader can run an alternative weighting without asking permission, and cannot exceed the guardrails
 - Every causal output states which weighting produced it
 - Sales, marketing, CS, and finance are reasoning from the same structural model
-- When two teams disagree, the disagreement is documented rather than negotiated
+- When two teams disagree, the disagreement is documented
 
 ---
 
@@ -170,11 +241,11 @@ Contextual weighting creates a real risk: sales runs one weighting, marketing ru
 
 **Approval by number.** Showing leadership a table of weights and asking for sign-off produces sign-off without comprehension. Show outputs.
 
-**Structural weights that change every quarter.** If the weight on pricing keeps moving, either the business is changing that fast, which is worth knowing on its own, or someone is fitting the model to recent results.
+**Structural weights that change every quarter.** If the weight on pricing keeps moving, either the business is changing that fast, which is worth knowing on its own (logged in the context object), or someone is fitting the model to recent results.
 
 **No default weighting.** Without a standing baseline, every run is an alternative and nothing is comparable across quarters.
 
-**Contextual weighting used to reach a conclusion.** The tell is a weighting run immediately before a high-stakes meeting that differs materially from the default, by the person whose function is under scrutiny. This is exactly what the logging rule exists to make visible.
+**Contextual weighting used to reach a conclusion.** Flexibility in contextual weighting should be used as a tool help discover the truth about the revenue narrative. It should not be used for self-benefiting reasons. 
 
 **AI writing to the context object.** An agent that logs its own context and then weights it has no external check at all.
 
