@@ -58,7 +58,7 @@ The distinction is the foundation of this skill. Conflating them is how causal m
 
 **What they are:** factors only observable because a human logged them. These live in the context object and do not exist anywhere in your systems otherwise.
 
-- Competitor changes
+- Competitor repositions
 - Pricing or packaging changes
 - Enablement changes
 - Team capacity and morale
