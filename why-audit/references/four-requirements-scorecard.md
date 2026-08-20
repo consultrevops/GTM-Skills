@@ -22,11 +22,17 @@ Use this scorecard to evaluate whether an AI-generated causal answer (any "why" 
 - Written rules specifying which variables the AI should evaluate when answering a causal question (e.g., champion status change, pricing change, competitor activity, rep behavior change, enablement change)
 - Explicit weighting logic that can be adjusted (e.g., champion departure is weighted higher than a minor pricing concession for enterprise deals, but not for SMB)
 - Clear separation between "these factors correlate with the outcome" and "this factor is the most likely cause" — the model doesn't treat correlation as causation by default
+- Structural and contextual factors are distinguished, with a documented split between them
+- Weights have a named owner, documented reasoning, and leadership sign-off through approval by example
+- Guardrail ranges bound how far contextual weights can be varied, and every weighting run is logged
 
 **What "Partial" looks like:**
 - Some variables are defined but weighting is implicit or hardcoded — nobody can easily adjust which factors matter more
 - The AI considers whatever fields exist in the CRM without guidance on which ones actually drive outcomes
 - A senior leader informally knows how to weight causes but hasn't documented it
+- Weights exist and are adjustable but were never approved by the leaders whose narratives depend on them
+- No guardrails on contextual weighting, so any conclusion can be produced by adjusting inputs
+- Weighting runs are not logged, so nobody can tell whether an output used the standing configuration
 
 **What "Missing" looks like:**
 - The AI generates a "why" answer by pattern-matching across whatever data it can access, with no instruction on how to rank or weight causes
@@ -35,6 +41,10 @@ Use this scorecard to evaluate whether an AI-generated causal answer (any "why" 
 **Questions to ask:**
 - If I changed the weight of "champion departure" from high to low, would the AI's answer change? If you can't do this, the model is missing.
 - Can someone who didn't build the system explain how it decides which cause to surface first?
+- Who approved these weights, and did they see example outputs before approving?
+- Can someone produce a conclusion they wanted by adjusting weights, and would anyone know?
+
+For building and governing this, see causal-model-setup/SKILL.md.
 
 ---
 
@@ -68,13 +78,13 @@ Use this scorecard to evaluate whether an AI-generated causal answer (any "why" 
 
 **What "Present" looks like:**
 - A defined object (custom object, structured doc, or dedicated system) where the team logs: enablement changes, market shifts, competitor moves, team capacity/burnout signals, pricing strategy changes, internal reorgs
-- Updated on a regular cadence (weekly, monthly, or triggered by events) — not just when someone remembers
-- Referenced by the AI when generating causal answers, so it can consider "we changed the pitch deck in week 3" alongside deal-level data
+- Updated within the last 30 days, with entries across at least four of the eight categories
+- Readable by the AI when generating causal answers, filtered by effective date and active status
 
-For the full schema, see `context-object-schema.md`.
+For the full schema, see causal-model-setup/references/context-object-schema.md.
 
 **What "Partial" looks like:**
-- Some of this context exists in Slack threads, meeting notes, or a leader's memory, but it's not structured or searchable
+- Some of this context exists in Slack threads, meeting notes, or a leader's memory, but it's not structured or searchable, or the object exists but hasn't been updated in 60+ days
 - The AI doesn't have access to it even if it exists somewhere in the org
 - One or two categories are tracked (e.g., competitor moves) but others aren't (e.g., enablement changes, team burnout)
 
