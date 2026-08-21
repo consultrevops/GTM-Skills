@@ -1,19 +1,18 @@
 # Control Book Template
 
-A blank, fillable version of the seven-section control book. Copy this for each reporting cycle. The format does not change between cycles, which is the entire point.
+A blank, fillable version of the seven-section control book. This is meant to be a repeatable framework for each board reporting cycle. It is not suggested to change the format between cycles.
 
-Fill every section. If a component does not apply to your business, write "Not applicable" and why, rather than deleting the row. A section that quietly disappears is a section the board stops asking about.
-
+Fill every section. If a component does not apply to your business, write "Not applicable" and why, rather than deleting the row. 
 ---
 
 ## Cover
 
 | Field | Value |
 |---|---|
-| **Reporting period** | |
-| **Prepared for** | |
-| **Date distributed** | |
-| **Prepared by** | |
+| **Reporting period** | Quarter & Year |
+| **Prepared for** | Board, Revenue Leadership, etc. |
+| **Date distributed** | Date |
+| **Prepared by** | [Name] |
 | **Dry run completed** | Date |
 | **Variance thresholds in effect** | Link or reference |
 
