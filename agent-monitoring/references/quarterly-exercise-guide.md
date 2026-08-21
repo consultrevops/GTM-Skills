@@ -1,8 +1,6 @@
 # Quarterly Exercise Guide
 
-The run sheet for the combined detection and response exercise. This exercise covers both `agent-monitoring` and `agentic-incident-playbook`, because a monitor that fires into a response nobody can run is not protection.
-
-It's recommended to run this quarterly.
+The run sheet for the combined detection and response exercise. This exercise covers both `agent-monitoring` and `agentic-incident-playbook`, because for a monitor to provide protection, you need to know how to run it. Suggested cadence is a quarterly run.
 
 ---
 
@@ -10,7 +8,7 @@ It's recommended to run this quarterly.
 
 Two halves, tested at different depths.
 
-**Detection: all five failure types, every quarter.** Seed a failure of each type and check whether the corresponding check catches it. This is fast, it costs little once you are already set up, and it is the half that decays quietly.
+**Detection: all five failure types, every quarter.** Seed a failure of each type and check whether the corresponding check catches it. This is fast, it costs little once you are already set up, and it is the half that decays quietly. A check that broke should be promptly surfaced.
 
 **Response: one failure type, rotating.** Walk the full seven-step protocol from `agentic-incident-playbook` on one type per quarter. The protocol is largely the same across types.
 
@@ -26,21 +24,19 @@ The agent determines how the response half is run.
 
 **Type B: Action-taking agents.** Agents that do things a customer or prospect can see. Sending email, enrolling sequences, updating records that trigger outbound. Covers failure type 2. The question is still capability, but timing genuinely matters, because every minute the agent runs is another wrong message sent.
 
-Run Type B at least once a year, and any time you deploy a new agent with send permissions.
+Run a response for Type B at least once a year, and any time you deploy a new agent with send permissions.
 
 ---
 
 ## Transparency Rules
 
-These are not optional.
+**Everyone involved in testing is aware of the procedures.** What is being tested, how, when it triggers, and what the results were. 
 
-**Everyone involved in the test knows everything.** What is being tested, how, when it triggers, and what the results were. There is no benefit to surprising the people running the exercise, and real cost if someone mistakes a seeded failure for a live one.
+**People affected by the agents are informed of testing.** Anyone whose work depends on an agent being tested should know a test is happening and what the results were. This typically a few messages. Who receives the notifications is at the discretion of whoever runs the test.
 
-**People not involved get told, not invited.** Anyone whose work depends on an agent being tested should know a test is happening and what the results were. That is two messages, not a meeting. Who receives them is at the discretion of whoever runs the test.
+**Production testing requires more notice.** If a tool has no sandbox, or the capability you need to test cannot be tested in one, the exercise runs in production. Announce it further in advance and to a wider group.
 
-**Production testing requires more notice, not less.** If a tool has no sandbox, or the capability you need to test cannot be tested in one, the exercise runs in production. Announce it further in advance and to a wider group.
-
-**Bad results get communicated regardless of scope.** If a test reveals that an agent has been producing wrong output for three weeks, everyone affected by that output needs to know, along with how it is being fixed and by when. This is not part of the exercise. It is what happens after.
+**Bad results get communicated regardless of scope.** If a test reveals that an agent has been producing wrong output for weeks, everyone affected by that output needs to know, along with how it is being fixed and by when. This happens after the exercise.
 
 ---
 
