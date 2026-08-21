@@ -2,200 +2,208 @@
 
 The run sheet for the combined detection and response exercise. This exercise covers both `agent-monitoring` and `agentic-incident-playbook`, because a monitor that fires into a response nobody can run is not protection.
 
-Run it quarterly. Run it in a test environment. Never in production.
+It's recommended to run this quarterly.
 
 ---
 
-## What This Exercise Proves
+## The Structure
 
-Four things, in order. Each one is a separate failure point.
+Two halves, tested at different depths.
 
-1. **Detection fires.** The check catches a seeded failure, and within a defined window.
-2. **Escalation routes.** The flag reaches the right person at the right severity through a channel someone actually watches.
-3. **Response runs.** The seven-step protocol executes without anyone rereading the document mid-incident.
-4. **Gaps surface.** Every hesitation, ownership ambiguity, and missing system gets logged with an owner.
+**Detection: all five failure types, every quarter.** Seed a failure of each type and check whether the corresponding check catches it. This is fast, it costs little once you are already set up, and it is the half that decays quietly.
 
-A monitoring layer that has never been tested against a seeded failure is monitoring on paper. Precision looks fine right up until the quarter you needed it.
+**Response: one failure type, rotating.** Walk the full seven-step protocol from `agentic-incident-playbook` on one type per quarter. The protocol is largely the same across types.
+
+**If a seeded failure is not caught during the detection round, that type becomes the response walkthrough for the quarter.** The miss tells you where the deeper time is worth spending.
+
+---
+
+## Two Exercise Types
+
+The agent determines how the response half is run.
+
+**Type A: Analysis agents.** Agents that produce outputs a human reads before acting. Scoring models, forecast tools, causal analysis. Covers failure types 1, 3, 4, and 5. The question is capability and correctness. Timing does not matter, because these failures run for days or weeks before anyone notices, and speed of response changes nothing.
+
+**Type B: Action-taking agents.** Agents that do things a customer or prospect can see. Sending email, enrolling sequences, updating records that trigger outbound. Covers failure type 2. The question is still capability, but timing genuinely matters, because every minute the agent runs is another wrong message sent.
+
+Run Type B at least once a year, and any time you deploy a new agent with send permissions.
+
+---
+
+## Transparency Rules
+
+These are not optional.
+
+**Everyone involved in the test knows everything.** What is being tested, how, when it triggers, and what the results were. There is no benefit to surprising the people running the exercise, and real cost if someone mistakes a seeded failure for a live one.
+
+**People not involved get told, not invited.** Anyone whose work depends on an agent being tested should know a test is happening and what the results were. That is two messages, not a meeting. Who receives them is at the discretion of whoever runs the test.
+
+**Production testing requires more notice, not less.** If a tool has no sandbox, or the capability you need to test cannot be tested in one, the exercise runs in production. Announce it further in advance and to a wider group.
+
+**Bad results get communicated regardless of scope.** If a test reveals that an agent has been producing wrong output for three weeks, everyone affected by that output needs to know, along with how it is being fixed and by when. This is not part of the exercise. It is what happens after.
 
 ---
 
 ## Before the Exercise
 
-### Two weeks out
-
-- [ ] Pick the failure type to test. Rotate so all five are covered annually.
-- [ ] Pick or write the scenario. Use `agentic-incident-playbook/references/tabletop-scenarios.md` or adapt a real near-miss.
-- [ ] Confirm the test environment has data recent enough that seeded failures will look realistic
-- [ ] Book 90 minutes with everyone who would be involved in a real incident of this type
-
 ### One week out
 
-- [ ] Send the invite with the failure type named but not the scenario details. Participants should not prepare a response in advance.
-- [ ] Confirm the facilitator, who should not be the person who owns the check being tested
-- [ ] Confirm the observer, whose only job is timing and note-taking
-- [ ] Pull the current state of the detection checks register, so results can be entered directly
+- [ ] Confirm which five checks will be tested, one per failure type
+- [ ] Pick the failure type for the response walkthrough. Rotate so all five are covered annually.
+- [ ] Determine whether the response walkthrough is Type A or Type B
+- [ ] Pick or write the scenario for the response half. Use `agentic-incident-playbook/references/tabletop-scenarios.md` or adapt a real near-miss.
+- [ ] Confirm which seeded failures can run in a sandbox. For any that cannot, note that they run in production and widen the notice.
+- [ ] Identify who holds each permission the response depends on. Confirm they can attend.
+- [ ] Book 60 minutes with the people running the test and planning what is being tested. Nobody else needs to attend.
+- [ ] Send the pre-test notification
+- [ ] Confirm the facilitator, who should not own the checks being tested
+- [ ] Pull the current detection checks register
 
-### Day of, before the session
+### Day of
 
-- [ ] Seed the failure into the test environment
-- [ ] Note the exact time of seeding, since detection window is measured from this moment
-- [ ] Confirm the seeded failure is actually present and would be visible to the check if the check works
-- [ ] Do not tell participants what was seeded or when
+- [ ] Seed all five failures
+- [ ] Confirm each is present and would be visible to its check if the check works
+- [ ] If the response walkthrough is Type B, note the exact seeding time for that failure. This is the start point for timing.
+
+---
+
+## Notifications
+
+Two messages. Short.
+
+### Pre-test
+
+> **Subject: AI agent test, [date]**
+>
+> We're running our quarterly test of the agents in the revenue stack on [date]. This checks whether our monitoring catches five categories of failure, and walks the response protocol for [failure type].
+>
+> [Sandbox / Production. If production: what will be visible, and what will not actually reach anyone outside the company.]
+>
+> If you see anything unusual from [agent names] on [date], check with [name] before acting on it.
+>
+> Results will follow within [timeframe].
+
+### Post-test
+
+> **Subject: AI agent test results**
+>
+> **Detection:** [X of 5 seeded failures caught. Name any that were missed.]
+>
+> **Response walkthrough:** [failure type tested, and what it surfaced]
+>
+> **What we found:** [gaps, in plain language]
+>
+> **What's changing:** [actions, owners, dates]
+>
+> **Does this affect anything you rely on:** [yes/no. If yes, what, for how long, and how it's being corrected.]
+
+**If the test surfaces a real problem,** meaning an agent has actually been producing wrong output in production, the post-test message goes to everyone affected, not just the people who ran the exercise. Include how long it has been happening, what decisions may have been made on bad output, and the correction timeline.
 
 ---
 
 ## Roles
 
-**Facilitator.** Reads the scenario, introduces complications on schedule, keeps the group walking the protocol rather than debating it. Should not own the check being tested, since that person needs to participate honestly rather than defend their configuration.
+**Facilitator.** Runs the detection round, reads the scenario for the response half, introduces complications, keeps the group walking the protocol rather than debating it, and captures gaps. Should not own the checks being tested.
 
-**Observer.** Times each step. Records gaps, hesitations, and ownership ambiguities. Does not participate in the response. This role is easy to skip and the exercise loses most of its value without it.
-
-**Participants.** Everyone who would be involved in a real incident. RevOps, the affected department head, whoever owns the AI tool, and whoever would make notification calls. If someone can't attend, note it. A response protocol that depends on one unavailable person is a finding.
+**Participants.** The people running the test and the people who planned it, plus whoever holds a permission the response depends on. For a Type B response walkthrough, this usually includes someone outside operations, since the team whose customers are affected would make the real correction.
 
 ---
 
-## Part 1: Detection (20 minutes)
+## Part 1: Detection, All Five Types
 
-Run this before anyone sees the scenario. Participants should not know what was seeded.
+Run this before the scenario walkthrough. This is the fast half.
 
-**What happens:** the group watches whether the check fires on its own.
+For each seeded failure:
 
-**Steps:**
+| Failure type | Check ID | Fired? | Within stated window? | Correct severity? | Notes |
+|---|---|---|---|---|---|
+| 1. Model drift | | | | | |
+| 2. Unauthorized action | | | | | |
+| 3. Cascading error | | | | | |
+| 4. Confident wrong narrative | | | | | |
+| 5. Stale or partial data | | | | | |
 
-1. Note the seeding time from the pre-session checklist
-2. Wait for the check's normal run cycle. If the check runs weekly, seed it the week before and evaluate at the session.
-3. Record whether it fired, and when
+**Also record:** did any check fire that should not have.
 
-**Record for each check tested:**
-
-| Question | Answer |
-|---|---|
-| Did the check fire? | Yes / No |
-| Time from seeding to fire | |
-| Was it within the check's stated detection window? | |
-| Did it fire at the correct severity? | |
-| Did any check that should not have fired, fire anyway? | |
-
-**If detection failed:** stop and diagnose before moving on. A missed seeded failure is the single most important output of the exercise, and it should not get buried under a good response walkthrough. Ask:
+**For every miss, diagnose before moving on:**
 
 - Was the threshold too loose?
-- Was the seeded failure realistic enough to be caught?
+- Was the seeded failure realistic enough to be catchable?
 - Did the check run at all, or is it silently broken?
 - Has this check ever fired on a real failure?
 
-Enter the result in the register under "seeded failures caught," including the misses.
+Enter all five results in the detection checks register under "seeded failures caught," including misses.
+
+**If one or more failures were missed,** the response walkthrough shifts to one of the missed types. A check that does not fire and a response nobody has practiced is the combination that turns a small problem into a long one.
 
 ---
 
-## Part 2: Escalation (10 minutes)
+## Part 2: Escalation
 
-**What happens:** the group traces where the flag went and who saw it.
+Trace where the flags went. Run this for every check that fired.
 
-**Questions to answer:**
+| Check ID | Channel routed to | Named owner saw it? | Route matches register? |
+|---|---|---|---|
+| | | | |
 
-- Which channel did the alert land in?
-- Who is subscribed to that channel?
-- Did the named owner of the check see it?
-- How long between the check firing and a human noticing?
-- If nobody noticed, how long would it have sat there?
+**Common finding:** a check fires correctly into a channel nobody reads. Neither a detection failure nor a response failure, which is why it persists.
 
-**Common finding:** the alert fired correctly into a channel nobody reads. This is not a detection failure and it is not a response failure, which is why it survives so long. It only surfaces in an exercise that traces the path end to end.
+---
 
-**Record:**
+## Part 3: Response, One Failure Type
 
-| Question | Answer |
+Read the scenario aloud. Walk the seven steps from `agentic-incident-playbook`.
+
+**One ground rule:** open the systems rather than describing what you would do. The value is discovering what is not actually possible, and that only surfaces when someone tries.
+
+### Type A: Capability check
+
+| Step | What to establish |
 |---|---|
-| Alert routed to | |
-| Named owner saw it? | Yes / No |
-| Time from fire to human acknowledgment | |
-| Route matches what the register says | Yes / No |
+| 1. Contain | Can this agent be paused? By whom? Is their access current? |
+| 2. Assess impact | Can the team list affected records? Can they see downstream automated actions, or only the direct effect? |
+| 3. Notify | Who gets told, at what severity? Draft the actual message. |
+| 4. Root cause | Does the group reach a systemic cause, or stop at the instance? "The AI was wrong" is not a root cause. |
+| 5. Remediate | Are all three levels addressed: data, decisions, system? "Correct the decisions" is the most commonly skipped. |
+| 6. Test the fix | Can the group describe a specific test, or does it stop at "we'd verify it works"? |
+| 7. Document | Does everyone know where the incident log lives? |
+
+### Type B: Capability check plus timing
+
+Same seven steps, with two numbers that matter.
+
+**Number 1: Time from wrong action to someone knowing.** Measured from when the agent took the action to when a human was aware of it. A detection problem. If it is long, the fix is monitoring, not response.
+
+**Number 2: Time from knowing to stopping.** Measured from awareness to the agent being fully stopped, including in-flight actions. A response problem. If it is long, the fix is permissions and access.
+
+Different problems with different owners. Record them separately.
+
+**Additional Type B questions:**
+
+- Can in-flight sends be stopped, or only future ones? Different capabilities, both need testing.
+- If the tool has no sandbox, can stopping be tested at all in production without actually sending?
+- Who has the permission to stop it, and are they reachable outside working hours?
+- If a customer already received something wrong, who makes the correction? Is that person in the room?
 
 ---
 
-## Part 3: Response (45 minutes)
-
-Now read the scenario aloud. Walk the seven steps from `agentic-incident-playbook`.
-
-**Ground rules:**
-
-- Participants do the work, they don't describe it. "I'd pull the field history" becomes "pull the field history now, we'll time it."
-- The facilitator introduces complications on schedule, not all at once
-- Nobody skips the notification step because it feels awkward. Draft the actual message.
-
-### Step 1: Contain
-
-**Observer times:** how long from scenario start to containment action taken.
-
-**Watch for:**
-- Whether anyone tries to diagnose before containing
-- Whether containment is technically possible (can you actually pause this agent?)
-- Who has the permissions to take the containment action, and whether they're in the room
-
-### Step 2: Assess impact
-
-**Observer times:** how long to produce a list of affected records.
-
-**Watch for:**
-- Whether the team can determine blast radius at all
-- Whether they check for downstream automated actions or stop at the direct effect
-- What information they need and can't get
-
-### Step 3: Notify
-
-**Observer records:** who the group decides to notify, and how long the decision took.
-
-**Watch for:**
-- Whether severity is assessed before notification scope
-- Hesitation about telling someone uncomfortable, especially a board or a customer
-- Whether anyone drafts the actual message or the group agrees to "let leadership know" in the abstract
-
-**Do not let this step be hypothetical.** Have someone write the notification. Read it aloud. It's the step that reveals whether the team can be direct under pressure.
-
-### Step 4: Root cause
-
-**Watch for:**
-- Whether the group reaches a systemic cause or stops at the instance
-- Whether "the AI was wrong" is treated as a root cause, which it isn't
-- Whether the process failure gets named alongside the technical one
-
-### Step 5: Remediate
-
-**Watch for:**
-- Whether all three levels get addressed: data, decisions, system
-- Whether "correct the decisions" gets skipped, which is the most commonly missed level
-- Whether the fix is scoped to the category or just the instance
-
-### Step 6: Test the fix
-
-**Watch for:**
-- Whether anyone proposes restoring the agent without testing
-- Whether the group can describe a specific test rather than "we'd verify it works"
-
-### Step 7: Document
-
-**Watch for:**
-- Whether the incident log gets filled in during the exercise or deferred
-- Whether the group knows where the log lives
-
----
-
-## Part 4: Debrief (15 minutes)
-
-**Three questions, in this order:**
+## Part 4: Debrief
 
 **1. What did we discover we can't do?**
 
-This is the primary output. Every "we'd need to check whether we can actually do that" during the walkthrough belongs on this list.
+The primary output. Every "we'd need to check whether that's possible" from the walkthrough.
 
 **2. Where was ownership unclear?**
 
-Any moment where people looked at each other before someone volunteered. Ambiguity that resolves in 15 seconds during an exercise takes an hour during a real incident.
+Any moment where people looked at each other before someone volunteered.
 
-**3. What would have been different at 2am on a Friday?**
+**3. Which steps depend on one specific person?**
 
-The exercise runs with everyone present and attentive. Real incidents don't. Which steps depend on a specific person being available, and what happens when they aren't?
+The exercise runs with everyone present. Real incidents don't.
 
-**Do not debrief on whether the group performed well.** Performance is not the output. Gaps are.
+**4. Did this surface anything real?**
+
+Separate from the seeded failures, did the exercise reveal that an agent has actually been producing wrong output in production? If so, that becomes its own incident and follows `agentic-incident-playbook`, not this guide.
 
 ---
 
@@ -206,71 +214,82 @@ The exercise runs with everyone present and attentive. Real incidents don't. Whi
 | Field | Detail |
 |---|---|
 | Date | |
-| Failure type tested | |
+| Checks tested | All five, list by check ID |
+| Response walkthrough type | Failure type, and A or B |
 | Scenario used | |
+| Environment | Sandbox / Production, note which checks ran where |
 | Facilitator | |
-| Observer | |
 | Participants | |
-| Absent, and their role | |
+| Pre-test notification sent to | |
+| Post-test notification sent to | |
 
 ### Detection results
 
-| Check ID | Fired? | Time to fire | Correct severity? | Notes |
+Use the Part 1 table. Enter every result in the detection checks register under "seeded failures caught."
+
+### Capability results
+
+| Step | Possible? | With what tool or permission | Who can do it | Notes |
 |---|---|---|---|---|
+| 1. Contain | | | | |
+| 2. Assess impact | | | | |
+| 3. Notify | | | | |
+| 4. Root cause | | | | |
+| 5. Remediate | | | | |
+| 6. Test the fix | | | | |
+| 7. Document | | | | |
 
-Enter these in the detection checks register under "seeded failures caught."
+### Type B timing
 
-### Response timings
-
-| Step | Time taken | Notes |
+| Measure | Time | What it points to |
 |---|---|---|
-| 1. Contain | | |
-| 2. Assess impact | | |
-| 3. Notify | | |
-| 4. Root cause | | |
-| 5. Remediate | | |
-| 6. Test the fix | | |
-| 7. Document | | |
+| Wrong action to awareness | | Detection |
+| Awareness to fully stopped | | Permissions and access |
+| In-flight actions stoppable? | Yes / No / Untestable | Tool capability |
 
 ### Gaps and actions
 
 | Gap | Type (system / ownership / process) | Owner | Due date |
 |---|---|---|---|
 
-**Rule:** the exercise is not complete when the session ends. It is complete when every gap has an owner and a date, and those actions are tracked somewhere that gets reviewed. An exercise that produces a list nobody actions is theater with a calendar invite.
+**Rule:** the exercise is complete when every gap has an owner and a date, tracked somewhere that gets reviewed. Otherwise next quarter surfaces the same gaps.
 
 ---
 
-## Rotation Schedule
+## Response Rotation
 
-Cover all five failure types annually. Suggested rotation:
+Detection covers all five types every quarter. Response rotates.
 
-| Quarter | Failure type | Why this order |
+| Quarter | Response walkthrough | Type |
 |---|---|---|
-| Q1 | Type 2, unauthorized action | Fastest-moving failure type, tests permission controls and containment speed |
-| Q2 | Type 1, model drift | Slowest-moving, tests whether detection catches gradual degradation |
-| Q3 | Type 4, confident wrong narrative | Tests the hardest notification conversation |
-| Q4 | Type 3 or Type 5 | Alternate annually |
+| Q1 | Type 2, unauthorized action | B |
+| Q2 | Type 1, model drift | A |
+| Q3 | Type 4, confident wrong narrative | A |
+| Q4 | Type 3 or Type 5, alternate annually | A |
+
+**The rotation yields when detection finds something.** A missed seeded failure takes priority over the scheduled type.
 
 **Off-schedule triggers:**
 
-- After any real incident, run a variation of that failure type within 30 days
+- After any real incident, run a response walkthrough on that failure type within 30 days
 - After any threshold retune, run the seeded failure test at the new setting before considering the retune complete
-- After deploying a new agent, run an exercise against it within one quarter
-- After the person who owns a check changes, run an exercise on that check within one quarter
+- After deploying a new agent, add it to the next quarterly detection round. If it has send permissions, make it the Type B response walkthrough within one quarter.
+- After the owner of a check changes, include that check in the next detection round
 
 ---
 
 ## Common Failure Modes in the Exercise Itself
 
-**Running it as a discussion.** If nobody opens a system, it's a meeting about incident response rather than a test of it. The value is in what people discover they can't actually do.
+**Running it as a discussion.** If nobody opens a system, it is a meeting about incident response rather than a test of it.
 
-**The check owner facilitating.** They know what was seeded and where the check is weak. Someone else facilitates.
+**The check owner facilitating.** They know what was seeded and where the checks are weak.
 
-**Skipping the observer role.** Without timing and structured notes, the debrief becomes impressions. "That felt slow" is not a finding. "Step 2 took 34 minutes because field history export requires an admin who wasn't in the room" is.
+**Skipping the notifications.** The pre-test and post-test messages are part of the exercise, not admin around it. Skipping them is how a seeded failure gets treated as real, or how a real finding stays inside the team that found it.
 
-**Only testing the response half.** Detection is the part that determines whether you find out at all. If you skip Part 1 because you don't have monitoring built, note that as a gap rather than treating the exercise as complete.
+**Testing detection on fewer than five types.** The detection round is the cheap half. Cutting it to save time removes the coverage that matters most, since a broken check produces no signal at all.
 
-**Debriefing on performance.** The instinct is to assess how well the team did. Nobody learns anything from that. Assess what was missing.
+**Timing a Type A response walkthrough.** If the team running the exercise is the team doing the containment, the stopwatch is self-administered and the number means nothing.
 
-**Not logging the actions.** The most common failure. A good exercise surfaces eight to twelve gaps. If they live in a doc nobody reopens, next quarter's exercise surfaces the same eight to twelve.
+**Debriefing on performance.** Assess what was missing, not how well the team did.
+
+**Not logging the actions.** A useful exercise surfaces several gaps. If they live in a doc nobody reopens, next quarter surfaces the same ones.
