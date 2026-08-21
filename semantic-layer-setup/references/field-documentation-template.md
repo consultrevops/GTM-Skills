@@ -10,13 +10,13 @@ One entry per field. Copy the blank template below. Three worked examples follow
 
 **What to document:** Every field referenced in `metric-glossary-template.md`, plus every field an AI agent can read or write, plus every field that feeds a report anyone outside your team looks at.
 
-**What not to document:** Fields nobody uses and no metric depends on. This file is a working map, not a full schema dump. A complete export of every field in your CRM is a different artifact and nobody reads it.
+**What not to document:** Unused fields and field without metric dependencies. This file is a working map, not a full schema dump. 
 
 **Where it lives:** Alongside the metric glossary. Same file, separate tab, or a linked document. They are read together.
 
 **Who owns it:** The system administrator for each source system owns the entries for that system. The semantic layer owner owns the file overall.
 
-**Review cadence:** Quarterly, alongside the metric glossary review. Also review any time a new AI tool gains access to a system.
+**Review cadence:** Twice per year, alongside the metric glossary review. Also review any time a new AI tool gains access to a system.
 
 ---
 
@@ -50,7 +50,7 @@ One entry per field. Copy the blank template below. Three worked examples follow
 
 **Field name (API).** The API name as it appears in the source system, not the label users see. `Opportunity.Loss_Reason__c`, not "Loss Reason." AI tools and integrations reference the API name.
 
-**Display name.** The label users see in the interface. Worth capturing because people describe fields by their label, and the two often diverge over time.
+**Display name.** The label users see in the interface. Worth capturing because people describe fields by their label, and the two can diverge over time.
 
 **System.** Salesforce, HubSpot, Snowflake, the billing platform, wherever this field lives.
 
@@ -70,7 +70,7 @@ One entry per field. Copy the blank template below. Three worked examples follow
 
 **Feeds which metrics.** Which entries in the metric glossary depend on this field. This is the link between the two files, and it is what tells you what breaks when a field changes.
 
-**Known issues.** Data quality problems someone should know about before trusting this field. Fill rate, legacy value formats, periods where the field was used differently, known duplicates. Be blunt here. "Blank on 40% of records created before Q2 2025" is more useful than silence.
+**Known issues.** Data quality problems someone should know about before trusting this field. Fill rate, legacy value formats, periods where the field was used differently, known duplicates. "Blank on 40% of records created before Q2 2025" is useful information.
 
 **AI read access.** Yes, No, or Conditional. If conditional, state the condition.
 
@@ -126,7 +126,7 @@ One entry per field. Copy the blank template below. Three worked examples follow
 | **Update frequency** | On record save at close |
 | **Validation rules** | Required when stage is set to Closed Lost. Free-text detail field required when value is Other. |
 | **Picklist values** | Price, Lost to Competitor, No Budget, No Decision, Timing, Missing Feature, Champion Left, Duplicate, Created in Error, Other. Deprecated values still present in historical records: Not Interested (retired Q1 2025), Bad Fit (retired Q1 2025). |
-| **Feeds which metrics** | Win rate, lost rates by stage, competitive loss rate, churn taxonomy reporting |
+| **Feeds which metrics** | Win rate, lost rates by stage, competitive loss rate, churn |
 | **Known issues** | "Other" is selected on roughly 30% of closed-lost records, which limits how much causal analysis this field can support. Free-text detail is often a single word. Reps close deals in bulk at quarter end, which produces clustered timestamps and lower-quality selections. |
 | **AI read access** | Yes |
 | **AI write access** | No |
@@ -171,7 +171,7 @@ Access is a policy decision. Left undecided, it defaults to whatever the integra
 **Restrict read access on these categories at minimum:**
 
 - Personal data covered by GDPR, CCPA, or similar regulation, especially where consent does not cover AI processing
-- Compensation, quota, and commission fields
+- Compensation and commission fields
 - Fields containing confidential contract terms
 - Internal notes fields where people write candidly about accounts or colleagues
 - Any field a customer would be surprised to learn was being processed by a model
@@ -179,6 +179,8 @@ Access is a policy decision. Left undecided, it defaults to whatever the integra
 **Restriction happens at the permission level, not in the prompt.** Telling an AI tool not to look at a field is a request. Removing the field from the integration's permission set is a control. Use the control.
 
 **Fields with multiple writers deserve extra scrutiny.** If a human, an automation, and an agent all write to the same field, you have a conflict-resolution problem waiting to happen. Document who wins and under what conditions, or reduce the number of writers.
+
+Both access rows are the baseline for agent monitoring. Write access is what field history gets checked against when detecting unauthorized agent writes. Read access defines what an agent should have been able to see, which matters when an analysis surfaces information from a field that was supposed to be restricted. A field with no documented access decision cannot be monitored either way, because there is nothing to compare an agent's behavior against. See agent-monitoring/SKILL.md. 
 
 ---
 
