@@ -101,7 +101,7 @@ They exist so `agent-monitoring` has a permission baseline to compare behavior a
 | `access_level` | Marketing user, restricted profile |
 | `write_access` | Yes |
 | `integrations` | HubSpot, Salesforce (read only), inbound form handler |
-| `triggers` | New lead created from an inbound form |
+| `triggers` | lead score threshold or specified intent/activity data |
 | `expected_usage_frequency` | Continuous |
 | `last_activity` | 2026-08-19 |
 | `last_credential_rotation` | 2026-06-01 |
