@@ -1,6 +1,6 @@
 # Metric Glossary Template
 
-This is the canonical record of how every revenue metric in your organization is calculated. One entry per metric. No metric appears in a board deck, dashboard, commission calculation, or AI prompt without an entry here.
+This is the canonical record of how every revenue metric in your organization is calculated. One entry per metric. It is not recommended to put metrics in a board deck, dashboard, commission calculation, or AI prompt without an entry here.
 
 Copy the blank template below for each metric. Two worked examples follow.
 
@@ -8,7 +8,7 @@ Copy the blank template below for each metric. Two worked examples follow.
 
 ## How to Use This File
 
-**Where it lives:** Anywhere your team will actually maintain it and your AI tools can reference it. A shared doc, a wiki page, a Notion database, or a file in your repo. The format matters less than the maintenance.
+**Where it lives:** Anywhere your team can maintain it and your AI tools can reference it. A shared doc, a wiki page, a Notion database, or a file in your repo. The format matters less than the maintenance.
 
 **Who owns it:** One person owns the file overall. Each metric has its own owner who approves changes to that definition.
 
@@ -16,7 +16,7 @@ Copy the blank template below for each metric. Two worked examples follow.
 
 **When to update an entry:** Any time the calculation changes, a source field changes, or the inclusion/exclusion rules change. Log it in the changelog at the bottom.
 
-**Review cadence:** Quarterly at minimum for organizations actively changing product, pricing, or reporting. Twice a year for stable organizations.
+**Review cadence:** A quarterly cadence is suggested for organizations actively changing product, pricing, or reporting. Twice a year is recommended for organization with less consistent changes.
 
 ---
 
@@ -45,7 +45,7 @@ Copy the blank template below for each metric. Two worked examples follow.
 
 ## Field Definitions
 
-**Metric name.** The official name as used in board reporting and internal discussion. Pick one and use it everywhere.
+**Metric name.** The official name as used in board reporting and internal discussion. Keep the naming conventions consistent everywhere.
 
 **Aliases.** Every other name people use for this same metric. "Logo churn," "customer churn," and "churn rate" might all mean the same thing in your org, or they might mean three different things. List every variant you have heard so AI tools can map them to the canonical definition, and so you catch cases where the same word means different things to different teams.
 
@@ -146,8 +146,9 @@ A changed definition is only half the work. Everything downstream that reference
 - [ ] Commission or comp calculations checked if this metric feeds them
 - [ ] Historical comparisons flagged, since prior periods were calculated the old way
 - [ ] Board or leadership notified if the change affects a reported number
+- [ ] Causal model weights checked if this metric feeds a structural factor (see causal-model-setup/references/weighting-governance-log.md)
 
-**On historical comparisons:** when a definition changes, prior periods calculated under the old definition are not directly comparable. Either restate history under the new definition or annotate the break in the series. Silently changing the definition and showing an unbroken trend line is how a board loses trust in a number.
+**On historical comparisons:** when a definition changes, prior periods calculated under the old definition are not directly comparable. Either restate history under the new definition or annotate the break in the series. Silently changing the definition and showing an unbroken trend line is how a board loses trust in a number. The same applies to the causal model. Structural weights derived from analysis under the old definition may not hold under the new one. Flag them for review at the next approval cycle rather than assuming they carry over.
 
 ---
 
