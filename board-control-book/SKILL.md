@@ -21,6 +21,14 @@ The goal is not a better slide deck. It's a reporting architecture that works th
 
 ---
 
+## Scope
+
+This covers the revenue section of a board package. ARR movement, pipeline and forecast, marketing performance, retention and expansion, unit economics, and the narrative that explains all of it.
+
+It does not cover the full board deck. P&L, cash position, headcount plans, product roadmap, and the strategic asks the board needs to decide on sit alongside this and are owned elsewhere. Where revenue and finance overlap, as they do in unit economics, ownership is shared and stated in the section.
+
+---
+
 ## The Problem This Solves
 
 Most revenue teams rebuild their board reporting from scratch every quarter. Someone spends a week pulling numbers from five systems, reconciling discrepancies between what sales sees and what finance sees, and formatting slides that will be outdated by the time the meeting starts.
@@ -47,18 +55,19 @@ When the format is consistent, directors stop asking what the numbers are. They 
 
 ## What Goes in the Control Book
 
-### Section 1: Financial Summary
+### Section 1: Revenue Summary
 
 | Component | What it covers | Owner |
 |---|---|---|
-| P&L snapshot | Revenue, gross margin, operating expenses, EBIT — actuals vs. plan vs. prior period | CFO |
-| Cash position | Cash on hand, burn rate, runway — actuals vs. forecast | CFO |
 | ARR movement | Starting ARR, new, expansion, contraction, churn, ending ARR — with waterfall | CRO |
+| ARR against plan | Ending ARR vs. plan and vs. prior period, with the gap stated in dollars and percent | CRO |
+| Revenue mix | ARR by product, by company ARR range, and by new versus expansion — current period and trailing 4 quarters | CRO |
 
 **Rules:**
-- Same format every cycle — no restructuring the waterfall categories quarter to quarter
-- Variance explanations are required for any line item that moved more than 10% from plan (threshold adjustable per org)
-- If any number in this section was generated or influenced by an AI tool (e.g., an AI-generated forecast that fed the plan), flag it explicitly with the label `[AI-assisted]` and name the tool
+- Same format every cycle. Do not restructure the waterfall categories quarter to quarter.
+- Variance explanations are required for any component that moved more than 10% from plan (threshold adjustable per org, see Step 4)
+- Revenue mix is reported alongside the movement, because the same ending ARR can reflect very different businesses depending on where it came from
+- If any number in this section was generated or influenced by an AI tool, flag it explicitly with the label `[AI-assisted]`, name the tool, and disclose it in Section 8
 
 ### Section 2: Pipeline and Forecast
 
