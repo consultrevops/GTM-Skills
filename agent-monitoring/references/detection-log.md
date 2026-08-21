@@ -1,4 +1,4 @@
-# Detection Checks Register
+# Detection Log
 
 The operating record for every monitoring check running against your AI agents. One row per check. This is where thresholds live, where dispositions accumulate, and where you find out whether a check is actually working or just quiet.
 
