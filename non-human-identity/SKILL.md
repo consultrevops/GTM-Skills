@@ -75,6 +75,8 @@ Produce a candidate list with what you can determine for each: platform, identif
 
 **Do not present the candidate list as complete.** Discovery from logs finds what has been active. Dormant credentials that have not authenticated in the log retention window will not appear. Say so.
 
+**Query patterns are patterns.** references/discovery-queries.md describes what to look for and where. Exact object names, field names, API endpoints, and log retention differ by platform, edition, and version. Translate each pattern against current documentation for the specific instance rather than running anything as written.
+
 ### Step 3: Populate the repository
 
 For each confirmed user, fill the schema in `references/user-repository-schema.md`.
