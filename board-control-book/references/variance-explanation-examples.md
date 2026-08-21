@@ -1,6 +1,6 @@
 # Variance Explanation Examples
 
-Section 6 of the control book requires four parts for every variance above threshold: what happened, why it happened, what's changing, and what it means for next period.
+Section 7 of the control book requires four parts for every variance above threshold: what happened, why it happened, what's changing, and what it means for next period.
 
 This file shows the difference between an explanation that survives a follow-up question and one that doesn't. Each example is written twice.
 
@@ -8,15 +8,15 @@ This file shows the difference between an explanation that survives a follow-up 
 
 ## What Makes a Variance Explanation Fail
 
-Most bad explanations fail in one of four ways.
+Four patterns account for most explanations that don't hold up.
 
-**Category instead of mechanism.** "Macro headwinds" names a category of cause without saying which specific thing happened to which specific deals. A board can't act on a category.
+**Category instead of mechanism.** "Macro headwinds" names a type of cause without saying which specific thing happened to which specific deals. A board can act on a mechanism, not a category.
 
-**Passive construction hiding the actor.** "Deals were delayed" invites the question nobody asks in the room but everyone thinks: delayed by whom, and why.
+**Passive construction.** "Deals were delayed" leaves out who delayed them and why. The active version carries the information the passive one drops.
 
-**A fix with no owner or date.** "We're addressing it" is not a plan. It's an acknowledgment.
+**A fix without an owner or a date.** "We're addressing it" describes intent. A named person and a date describes a plan.
 
-**No forward implication.** An explanation that stops at what happened leaves the board to work out the consequence themselves, usually less accurately than you would have.
+**No forward implication.** An explanation that stops at what happened leaves the board to work out the consequence on their own, usually with less information than you have.
 
 ---
 
@@ -32,7 +32,7 @@ Most bad explanations fail in one of four ways.
 >
 > **What it means:** We expect improvement in Q3.
 
-**What's wrong with it:** "Increased competitive pressure" is a category, not a mechanism. Nobody named a competitor, a segment, or a deal. "The team is focused on" has no owner and no date. "We expect improvement" is a hope stated as a forecast. A board member's first question will be "which competitor," and there's no answer prepared.
+**What's wrong with it:** "Increased competitive pressure" is a category, not a mechanism. Nobody named a competitor, a segment, or a deal. "The team is focused on" has no owner and no date. "We expect improvement" is a hope stated as a forecast. A board member's first question will be "which competitor."
 
 ### Strong version
 
@@ -169,7 +169,7 @@ Positive variances need explanations too. An unexplained beat is as much of a ga
 Before a variance narrative goes into the deck:
 
 - [ ] The number is stated with both the actual and the comparison point
-- [ ] The cause names specific deals, segments, accounts, or events, not a category
+- [ ] The cause names specific deals, cohorts, accounts, or events, not a category
 - [ ] Where multiple causes exist, they are weighted rather than just listed
 - [ ] Any AI-generated causal analysis passed the why-audit before inclusion
 - [ ] Verified facts are separated from hypotheses, and each is labeled
@@ -178,6 +178,7 @@ Before a variance narrative goes into the deck:
 - [ ] The forward implication includes a number, not just a direction
 - [ ] Positive variances are explained with the same rigor as negative ones
 - [ ] No phrase from this list appears anywhere: macro headwinds, timing dynamics, pipeline softness, market conditions, execution challenges, strong execution, we're monitoring closely
+- [ ] If a causal model informed the explanation, the weighting used is stated, and any non-default weighting is called out
 
 ---
 
