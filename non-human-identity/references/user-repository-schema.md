@@ -97,7 +97,7 @@ They exist so `agent-monitoring` has a permission baseline to compare behavior a
 | `user_type` | AI agent |
 | `primary_owner` | Priya Nair, Marketing Ops Manager |
 | `escalation_owner` | Dan Whitfield, Director of RevOps |
-| `purpose` | Enrolls new inbound leads into the appropriate nurture sequence based on form source and stated interest |
+| `purpose` | Enrolls new inbound leads into the appropriate nurture sequence based on lead score, activity data, and intent |
 | `access_level` | Marketing user, restricted profile |
 | `write_access` | Yes |
 | `integrations` | HubSpot, Salesforce (read only), inbound form handler |
