@@ -1,314 +1,250 @@
 ---
 name: agent-monitoring
 description: >
-  Builds the detection layer that catches AI agent failures in a revenue
-  stack before they reach a decision, a report, or a customer. Covers
-  drift detection, unauthorized action monitoring, anomaly detection,
-  narrative quality checks, and data coverage verification. Triggers on
-  agent monitoring, AI observability, model drift detection, is my AI
-  working, how do I know if the agent is wrong, monitoring AI outputs,
-  AI quality checks, agent guardrails, or any request about verifying
-  that AI systems in the revenue stack are still producing trustworthy
-  outputs. BOUNDARY - For responding to a failure that already reached a
-  decision, see agentic-incident-playbook. For the metric definitions
-  this skill depends on, see semantic-layer-setup.
+  Builds and operates the detection layer that catches AI agent failures
+  in a revenue stack before they reach a decision, a report, or a
+  customer. Covers drift detection, unauthorized action monitoring,
+  anomaly detection, narrative quality screening, and coverage
+  verification. Triggers on agent monitoring, AI observability, model
+  drift, is my AI working, how do I know if the agent is wrong, monitoring
+  AI outputs, agent guardrails, detection register, seeded failure test,
+  or any request about verifying that AI in the revenue stack is still
+  producing trustworthy output. BOUNDARY - For responding to a failure
+  that already reached a decision, see agentic-incident-playbook. For the
+  agent permission baseline this skill compares against, see
+  non-human-identity. For metric definitions, see semantic-layer-setup.
 ---
 
-# Agent Monitoring — Catching Failures Before They Reach a Decision
+# Agent Monitoring
 
-You are helping someone build continuous detection for the AI agents operating in their revenue stack. The goal is catching a wrong output while it is still an output, before it becomes a decision, a board slide, or an email a customer received.
+You are helping someone build or operate detection for the AI agents in their revenue stack.
 
-This skill covers detection. For what happens after a failure reaches a decision, see `agentic-incident-playbook/SKILL.md`.
+Two modes. Determine which applies before proceeding.
 
----
+**Build** if checks do not exist, or if a new agent has been deployed without coverage. Inventory review, failure type mapping, check design, threshold setting, register population.
 
-## Prerequisite
+**Operate** if checks are running. Flag context assembly, disposition support, clustering, quarterly register analysis, seeded failure generation.
 
-**This skill requires a semantic layer.** Drift detection compares model outputs against documented metric definitions. Coverage checks require knowing which fields feed which metric. Unauthorized action monitoring requires a documented list of which fields each agent is permitted to touch.
-
-Without documented definitions, monitoring has nothing to compare against. You will be measuring an agent's output against an undefined standard, which produces alerts nobody can act on.
-
-Build `semantic-layer-setup/SKILL.md` first.
+Ask which applies if it is unclear.
 
 ---
 
-## The Honest Split Between Automation and AI
+## The Five Failure Types
 
-Most of what gets sold as "AI monitoring" is a scheduled query with a marketing label. This skill labels each detection method for what it actually is.
-
-**Deterministic checks** compare numbers against numbers. A scheduled report, a query, a correlation calculation. These do not drift, do not hallucinate, and do not require a model. Most monitoring belongs here.
-
-**Anomaly detection** surfaces patterns that deviate from an established baseline without someone having written a rule in advance. This is classical statistical modeling, not generative AI, and it catches failure modes nobody anticipated.
-
-**Model-based reading** uses AI to evaluate unstructured text at volume. Sentiment across thousands of transcripts, tone drift in generated outbound copy, causal claims in a written analysis. This is the only category that genuinely requires a language model.
-
-The rule underneath all three: **the monitor should be simpler than what it monitors, and it should check against ground truth rather than against another model's judgment.** A generative model evaluating another generative model's opinion is circular. A deterministic check comparing predicted scores against deals that actually closed is not.
-
----
-
-## What to Monitor
-
-The five failure types from `agentic-incident-playbook` viewed earlier in their lifecycle. Each maps to a specific detection method.
-
-### Type 1: Model Drift
-
-**Detection method:** Deterministic. No AI required.
-
-**What to run:** Compare model predictions against realized outcomes on a rolling basis. For a pipeline scoring model, correlate scores at a point in time against whether those deals actually closed. For a forecast model, compare forecasted to actual by category.
-
-**What to watch:**
-- Score-to-outcome correlation, trailing 90 days, compared against the correlation at last calibration
-- Distribution shift in model inputs (average deal size, segment mix, product mix) against the distribution the model was calibrated on
-- Rate at which humans override the model's output
-
-**Threshold example:** Flag when score-to-outcome correlation drops more than 15% from the calibration baseline, or when override rate exceeds 15% in a rolling month.
-
-**Why this catches it early:** Drift produces no dramatic failure. Each individual output looks plausible. Only the aggregate reveals the problem, which is exactly what a rolling statistical check sees and a human reviewer does not.
-
-### Type 2: Unauthorized or Unintended Actions
-
-**Detection method:** Deterministic. No AI required.
-
-**What to run:** Query field history and agent audit logs against a documented permission list.
-
-**What to watch:**
-- Any write by an agent to a field outside its documented scope
-- Volume of writes per agent per day, compared against its normal range
-- Records touched outside the agent's expected population (e.g., an agent scoped to new leads touching closed-won accounts)
-- Communications sent outside approved sequences or templates
-
-**Threshold example:** Any single out-of-scope write escalates immediately. Volume anomalies flag at 3x the trailing 30-day daily average.
-
-**Requirement:** This only works if each agent has a documented list of permitted fields and actions. That list lives in the semantic layer field documentation under the AI access column.
-
-### Type 3: Cascading Data Errors
-
-**Detection method:** Anomaly detection. Statistical modeling, not generative AI.
-
-**What to run:** Baseline the normal flow of records through your workflows, then flag deviations from that baseline.
-
-**What to watch:**
-- Records exiting a stage or sequence at a rate outside the normal range
-- Sudden changes in enrichment match rates or field-fill rates
-- Clusters of records with an unusual combination of attributes appearing in a short window
-- Deals removed from active pipeline by automation rather than by a human
-
-**Why anomaly detection rather than rules:** Cascading errors are, by definition, failures nobody predicted. A rule catches what you already thought to check for. Baseline deviation catches the shape of a problem you have not seen before.
-
-**Caution:** Anomaly detection produces false positives during legitimate business changes. A new product launch, a territory reassignment, or a pricing change will trip these. Every flag needs a human to distinguish a real error from a real change. See Threshold Governance and False Positive Reduction below.
-
-### Type 4: Confident Wrong Narrative
-
-**Detection method:** Model-based reading. Requires a language model.
-
-**What to run:** Screen AI-generated causal explanations against known markers of unverified claims before the explanation reaches a deck, a decision, or a coaching conversation.
-
-**What to watch:**
-- Single-cause certainty when the underlying data supports multiple explanations
-- A stated mechanism with no supporting data point
-- Narrative coherence standing in for evidence
-- Citations to benchmarks or external authority that cannot be verified
-
-The full marker list lives in `why-audit/references/false-confidence-markers.md`.
-
-**The limit worth naming:** this is a model reading another model's output, which is the circularity this skill otherwise avoids. It works because the screen is checking for structural patterns in the text rather than judging whether the claim is true. It flags for human review. It never clears a claim on its own.
-
-### Type 5: Stale or Partial Data Reasoning
-
-**Detection method:** Deterministic. No AI required.
-
-**What to run:** Compare the volume of data an AI analysis actually processed against the volume available for the question asked.
-
-**What to watch:**
-- Coverage ratio: records cited or processed divided by records matching the query scope
-- Recency: the date range the analysis actually covered against the range requested
-- Integration health: whether every expected data source was connected and returning data at the time of the analysis
-
-**Threshold example:** Flag any analysis where coverage falls below 80% of the available population, and require the coverage figure to be stated alongside any output used in a decision.
-
-**Why this matters:** an agent that keyword-sampled 20 transcripts out of 4,000 produces output identical in tone and structure to one that read everything. The coverage ratio is the only signal that distinguishes them.
-
----
-
-## Escalation
-
-Detection is only useful if something happens when it fires.
-
-| Detection severity | What it means | Who acts | Timeline |
-|---|---|---|---|
-| Critical | Out-of-scope agent action, or a flagged output already reached a decision | Affected department head plus RevOps, immediately | Same day. Move to `agentic-incident-playbook`. |
-| High | Drift beyond threshold, or coverage below minimum on an output in active use | RevOps plus the model owner | Within 48 hours |
-| Medium | Anomaly flagged, cause not yet determined | RevOps | Within one week |
-| Low | Threshold approached but not crossed, or a single unexplained flag | RevOps, logged for pattern review | Next scheduled review |
-
-**The handoff point:** monitoring stops and incident response begins the moment a wrong output has influenced a decision, reached a customer, or entered a report. Everything before that is detection. Everything after is `agentic-incident-playbook`.
-
----
-
-## Threshold Governance and False Positive Reduction
-
-Every detection method has a threshold set by a human. Thresholds decay. And a check that fires constantly gets ignored, which makes it functionally worse than no check at all.
-
-The goal is fewer flags without fewer catches. Those pull against each other, and managing that tension is the whole job of this section.
-
-### Disposition Every Flag
-
-No flag closes without a disposition. This is the input that everything else in this section depends on.
-
-| Disposition | Definition | What it triggers |
+| Type | What it is | Detection method |
 |---|---|---|
-| **True positive** | A real failure. The agent produced a wrong output or took a wrong action. | Move to escalation. If it reached a decision, `agentic-incident-playbook`. |
-| **Known business change** | The deviation is real but expected. A launch, a reorg, a territory shift, a pricing change. | Log the change. Consider a suppression window (below). Feed the label back to the baseline. |
-| **Threshold artifact** | Nothing meaningfully changed. The threshold is too tight for normal variance. | Retune the threshold. Do not suppress. |
-| **Unexplained** | Cause could not be determined within the review window. | Keep open. Review at the next scheduled cycle. Never close as false positive by default. |
+| 1. Model drift | Scoring, weighting, or classification has shifted from its calibration. The model did not change, the data did. | Deterministic |
+| 2. Unauthorized action | The agent acted outside its defined scope. Wrote a field it should not touch, sent a communication without approval, acted on records outside its population. | Deterministic |
+| 3. Cascading error | One wrong output fed the next step, which fed the next, amplifying the original error. | Anomaly detection |
+| 4. Confident wrong narrative | The agent produced a causal explanation that was wrong but sounded right, used before anyone validated it. | Model-based |
+| 5. Stale or partial data | The agent answered a question spanning a large dataset but processed a fraction of it, with no coverage disclosure. | Deterministic |
 
-**Rule:** unexplained is not the same as false positive. Closing unknowns as noise is how a monitoring layer trains itself into blindness. Track them separately and revisit them.
+## Three Detection Methods
 
-### The Feedback Loop
+**Deterministic.** Numbers compared against numbers. A query, a report, a correlation. No model involved. Four of five failure types belong here.
 
-This applies to anomaly detection specifically. Deterministic checks do not learn, they get retuned by a human.
+**Anomaly detection.** Baseline deviation surfaced without a rule written in advance. Statistical modeling, not generative AI.
 
-Anomaly detection produces most of the false positive volume, because legitimate business change and real error look structurally similar to a baseline model. The fix is supervised: dispositions become labels, labels update the baseline.
+**Model-based.** A language model evaluating unstructured text at volume. Only Type 4 requires this.
 
-**How it works:**
-- Every flag carries its disposition back to the model
-- Patterns labeled "known business change" stop registering as anomalous when they recur in a similar shape
-- Patterns labeled "true positive" increase sensitivity to that shape
-- The baseline recalculates on a defined cadence rather than continuously, so a burst of unusual activity does not silently become the new normal before anyone reviews it
-
-**Expect a tuning period.** The first 60 to 90 days after deploying anomaly detection will produce a high false positive rate. This is not a malfunction. The model has no labeled history yet. Budget human review time accordingly and resist the urge to loosen thresholds during this window, because premature loosening bakes in blind spots before the model has learned anything.
-
-**What the loop cannot fix:** if dispositions are applied carelessly, the model learns carelessly. Garbage labels produce a model that confidently ignores real failures. Whoever dispositions flags needs enough context to distinguish a real error from a real change, which usually means RevOps rather than a rotating queue.
-
-### Suppression Windows
-
-The cheapest false positive reduction available, and it requires no model at all.
-
-When a business change is planned, tell the system to expect deviation in that window instead of letting it flag daily for two weeks.
-
-**When to open a suppression window:**
-- Product launches and sunsets
-- Pricing or packaging changes
-- Territory or segment reassignment
-- Comp plan changes
-- Large data migrations or CRM configuration changes
-- Seasonal patterns with known historical shape
-
-**Rules for suppression:**
-- Every window has a start date, an end date, and a named owner. Open-ended suppression is how monitoring quietly turns off.
-- Suppression narrows scope, it does not disable the check. Suppress the specific metric or record population affected, not the whole detection method.
-- Critical severity never suppresses. An out-of-scope agent write escalates during a product launch the same as any other day.
-- Suppressed flags are still logged, just not escalated. When the window closes, review what accumulated. If something in there was a real failure, that is a lesson about how the window was scoped.
-
-**Best practice:** build suppression into the change management process. When a launch date is set, the suppression window gets opened at the same time, by the same person, with the same end date.
-
-### Check Performance Register
-
-Track for every check:
-
-| Field | What to capture |
-|---|---|
-| Check name | What it monitors |
-| Failure type | Which of the five it detects |
-| Method | Deterministic, anomaly detection, or model-based |
-| Threshold | Current trigger condition |
-| Owner | One named person |
-| Last reviewed | Date |
-| Last retuned | Date, with what changed and why |
-| Times fired | Count, trailing quarter |
-| True positives | Count |
-| Known business change | Count |
-| Threshold artifacts | Count |
-| Unexplained | Count, currently open |
-| Precision | True positives divided by total fired |
-| Seeded failures caught | From the quarterly exercise, out of how many attempted |
-
-**Precision is the false positive metric.** A check firing 40 times with 8 true positives has 20% precision. Track it per check, not in aggregate, because one noisy check will drag an otherwise healthy suite below any threshold you set.
-
-### Retuning Rules
-
-- **Precision below 30% for two consecutive quarters:** retune the threshold or narrow the check's scope. Document what changed.
-- **Precision below 15%:** the check is actively harmful. Retire it or rebuild it. People have already stopped reading its alerts.
-- **Precision above 90% with low fire volume:** the threshold may be too tight in the other direction. Verify the check still catches seeded failures before assuming it is well-tuned.
-- **A check that has never fired:** unknown state, not a healthy one. It gets tested in the next quarterly exercise before anyone concludes it works.
-
-### The Sensitivity Guardrail
-
-Every threshold loosened to reduce noise is a real failure that might now slip through. A monitoring layer optimized only for fewer alerts will eventually optimize into catching nothing, and its precision metric will look excellent the entire time.
-
-**Three rules prevent this:**
-
-1. **Never retune a threshold without running the seeded-failure test at the new setting.** If the check no longer catches the test failure, the new threshold is wrong regardless of what it did to precision.
-
-2. **Track seeded failures caught alongside precision.** Precision measures noise. Seeded failure catch rate measures whether the check still works. A check with 95% precision that misses seeded failures is a check that stopped detecting anything.
-
-3. **Retuning is directional and reviewed.** Every threshold change is logged with what changed, why, and who approved it. A threshold that has been loosened three quarters in a row is a pattern worth questioning, and that pattern is only visible if the changes are logged.
-
-**The failure mode this prevents:** a quarter where flags dropped 60%, the team celebrates less noise, and nobody notices that two real drift events passed through unflagged. The seeded-failure test is the only thing that surfaces this before an incident does.
+**The rule:** the monitor is simpler than what it monitors, and it checks against ground truth rather than another model's judgment. Never label a scheduled query as AI.
 
 ---
 
-## The Quarterly Exercise
+## Build Mode
 
-**This exercise covers both this skill and `agentic-incident-playbook`.** Detection and response are tested together, in one session, because a monitor that fires into a response nobody knows how to run is not protection.
+### Step 1: Check prerequisites
 
-Run it in a test environment with seeded data. Never in production.
+Establish and report on each before designing anything:
 
-**What you are testing, in order:**
+| Prerequisite | What it supplies | Source |
+|---|---|---|
+| User repository, agent fields populated | `permitted_write_fields`, `scoped_population`, `external_actions` | `non-human-identity` |
+| Field documentation | Field-level AI read and write access | `semantic-layer-setup` |
+| Metric definitions | What drift and coverage checks compare against | `semantic-layer-setup` |
+| System access | Field history, audit logs, score-to-outcome history | The platforms themselves |
 
-1. **Does detection fire?** Seed a failure of one type into the test environment. A drifted score set, an out-of-scope field write, a coverage gap. Confirm the check catches it and within what window.
+**State which are missing.** Design checks where the inputs exist. Mark the rest blocked and name the specific missing input.
 
-2. **Does it escalate correctly?** Confirm the flag reaches the right person, at the right severity, through the channel it is supposed to use.
+Without `permitted_write_fields` and `scoped_population`, Type 2 checks cannot be built at all. If those are blank, route to `non-human-identity` before proceeding.
 
-3. **Does the response protocol run?** Walk the seven steps from `agentic-incident-playbook` with everyone who would be involved in a real incident. Time each step.
+### Step 2: Map agents to failure types
 
-4. **Where are the gaps?** Note every hesitation, every unclear ownership, every point where the protocol assumes something exists that does not.
+Read `likely_failure_types` from the repository for each agent. Where it is blank, propose a mapping based on what the agent does:
 
-**Cadence:** Quarterly, rotating through the five failure types so each gets tested at least annually. After any real incident, run a variation of that failure type within 30 days.
+- Scores, classifies, or forecasts → Type 1
+- Has any `permitted_write_fields` or `external_actions` → Type 2
+- Feeds another automated step → Type 3
+- Produces causal explanations → Type 4
+- Analyzes datasets larger than a context window → Type 5
 
-**What good looks like:** detection fires within its stated window, the right person is notified without anyone asking who owns it, and the response protocol runs without someone having to reread the document mid-incident.
+Most agents carry two or three. Propose, do not write to the repository.
+
+### Step 3: Design checks
+
+One check per failure shape, not one per agent. For each agent and failure type, ask what specifically could go wrong and design a check for each answer.
+
+**Type 1, drift.** Compare predictions against realized outcomes on a rolling window. Score-to-outcome correlation against the correlation at last calibration. Distribution shift in model inputs against the calibration distribution. Human override rate.
+
+**Type 2, unauthorized action.** Three distinct checks, because they catch different things:
+- Field history for writes outside `permitted_write_fields`
+- Records written to outside `scoped_population`
+- Write volume against the trailing average
+
+An agent writing permitted fields to the wrong records passes the first check and fails the second. Both are needed.
+
+**Type 3, cascading error.** Baseline record flow through workflows, then flag deviation. Records exiting a stage or sequence outside normal range. Enrichment match rate changes. Unusual attribute clusters in a short window. Records removed from pipeline by automation rather than a human.
+
+**Type 4, confident wrong narrative.** Screen AI-generated causal explanations against the markers in `why-audit/references/false-confidence-markers.md` before they reach a deck or a decision. Flag for human review. Never clear a claim.
+
+**Type 5, stale or partial data.** Coverage ratio of records processed divided by records matching the query scope. Date range covered against range requested. Integration health at time of analysis.
+
+### Step 4: Propose thresholds
+
+Propose a starting threshold with the reasoning stated. Do not set one silently.
+
+Reference points, not defaults:
+- Drift: correlation drop beyond 15% from calibration baseline, or override rate above 15% in a rolling month
+- Unauthorized action: any single out-of-scope write. Volume at 3x trailing 30-day average.
+- Coverage: below 80% of available population
+
+**Ask the user to confirm or adjust.** How much drift is tolerable before someone should act is a business judgment. State that when proposing.
+
+### Step 5: Assign severity and routing
+
+| Severity | Meaning | Routing |
+|---|---|---|
+| Critical | Out-of-scope agent action, or a flagged output that already reached a decision | Monitoring channel, plus DM and email to two named contacts |
+| High | Drift beyond threshold, or coverage below minimum on an output in use | Monitoring channel, plus DM and email to two named contacts |
+| Medium | Anomaly flagged, cause undetermined | Monitoring channel |
+| Low | Threshold approached, not crossed | Monitoring channel |
+
+Every flag notifies immediately. Two named contacts, not one.
+
+### Step 6: Populate the register
+
+Fill `references/detection-register.md` for each check. Ask for owner. Do not infer one.
+
+Report back which agents in the repository still have no covering check.
 
 ---
 
-## Building the Monitoring Layer
+## Operate Mode
 
-**Step 1: Confirm the semantic layer exists.** Metric definitions, field documentation, and the AI access column. Without these, skip to `semantic-layer-setup`.
+### On a flag: assemble context
 
-**Step 2: Inventory every agent.** What it does, which systems it touches, what it reads, what it writes, who owns it. Anything that scores, enriches, sequences, forecasts, or generates counts.
+This is the highest-value task in this skill. Do it before a human opens the flag.
 
-**Step 3: Map each agent to its likely failure types.** A scoring model risks drift. A sequencing agent risks unauthorized actions. An analysis agent risks confident wrong narrative and partial data. Some agents carry two or three.
+Assemble and present:
 
-**Step 4: Build the deterministic checks first.** They cover the majority of failure modes, cost the least to build, and produce the fewest false positives. Drift correlation, permission auditing, coverage ratios.
+1. **What fired.** Check ID, severity, threshold crossed, by how much.
+2. **What it touched.** The records involved, with enough detail to recognize them.
+3. **Deviation size.** Against baseline, and against the last several periods.
+4. **This check's history.** The last several times it fired and how each was dispositioned.
+5. **Context object overlap.** Query the context object for entries whose `effective_date` and `affected_segment` overlap this flag. Report any match with its confidence level.
+6. **What else moved.** Other checks that fired in the same window, other changes in the same population.
+7. **Proposed disposition,** with the reasoning.
 
-**Step 5: Add anomaly detection where rules cannot reach.** Workflow deviation, enrichment quality, unexpected record clusters. Expect a tuning period.
+**Where a context object entry overlaps,** propose Known business change and cite the entry, its confidence level, and its effective date. Where the entry is logged Speculative, say so and do not present the match as settled.
 
-**Step 6: Add model-based screening only where text must be read.** Narrative quality checks on causal explanations. Nothing else needs a model.
+**Where nothing explains it,** propose Unexplained. Do not construct a plausible cause to fill the gap. That is the failure this whole repository exists to prevent.
 
-**Step 7: Set thresholds, assign owners, schedule the review.** Every check gets a person and a date.
+### On multiple flags: cluster
 
-**Step 8: Run the quarterly exercise.** Until detection has been tested against a seeded failure, you have monitoring on paper.
+During a business change or a real incident, one cause produces many flags. Group by likely common cause and present clusters rather than a list.
+
+For each cluster: the flags in it, the proposed common cause, and the evidence. A human dispositions the cluster.
+
+State clustering confidence. Flags grouped on a shared timestamp and population are a stronger cluster than flags grouped on timing alone.
+
+### Quarterly: register analysis
+
+Produce ahead of the review, delivered with the seeded failure data.
+
+Read the register as a dataset and report:
+
+- **Precision per check,** with any check crossing a retuning or retirement threshold flagged and the specific rule named
+- **Checks loosened in two or more consecutive quarters.** Invisible in any single quarter. This is the pattern the sensitivity guardrail exists to catch.
+- **Checks with blank seeded-failure results.** The register claims coverage nobody verified.
+- **Rising unexplained counts,** which point at either output nobody can interpret or nobody having time to investigate
+- **High known-business-change counts,** which point at suppression not being used rather than a threshold being wrong
+- **Owners who have left or changed roles,** cross-referenced against the directory
+- **Agents in the repository with no covering check.** The coverage question the register cannot answer about itself.
+
+Present as items requiring a decision, each with what it points to and the rule or trend that surfaced it.
+
+### Quarterly: seeded failure generation
+
+Generate test data for one failure of each of the five types, sized and shaped to be realistic for this environment.
+
+For each: what is being seeded, which check should catch it, the expected detection window, and how to remove it afterward.
+
+**You generate. A human seeds.** Produce the test data, the insertion instructions, the expected detection window, and the removal steps. A human inserts it, confirms it landed where intended, and removes it afterward. Do not write test data to any system, sandbox included.
+
+### On request: suppression windows
+
+When a planned change is described or found in the context object, propose a suppression window: which checks it would trip, the affected population, a start date, and an end date.
+
+**Scope narrowly.** Suppress the affected metric and population, not the whole check.
+
+**Critical never suppresses.** An out-of-scope write escalates during a product launch the same as any other day.
+
+**Every window gets an end date.** Estimate it and say it is an estimate. A window without an end outlasts the change it was opened for.
 
 ---
 
-## Common Failure Modes
+## The Quarterly Detection Test
 
-**The green dashboard.** Every check shows healthy and nobody has verified any of them can catch anything. This is the same problem as an untested incident plan. It provides the feeling of coverage and removes the urgency to look manually. Only the quarterly exercise resolves it.
+Detection untested against a seeded failure is unverified.
 
-**Correlated blindness.** The monitor and the monitored system read from the same source. Bad enrichment data feeds both the scoring model and the check watching it, and both see the same wrong value. Mitigate by checking against realized outcomes rather than against upstream data.
+**Cadence:** quarterly, all five failure types.
 
-**Alert fatigue.** Too many flags, and people stop reading them. Track precision per check and retire anything below the retuning threshold.
+**Environment:** sandbox with seeded data. Where a system has no sandbox, note it and widen the notice.
 
-**Threshold rot.** A check calibrated eighteen months ago against a business that no longer exists. Quarterly review with named owners is the only fix.
+**Sequence:**
 
-**Monitoring without escalation.** The check fires into a channel nobody watches, or flags a problem with no named owner. Detection without a defined escalation path is logging, not monitoring.
+1. Send the pre-test notification
+2. A human seeds all five failures using the generated data and instructions
+3. Wait for each check's normal run cycle
+4. Record what fired, within what window, at what severity
+5. Record any check that fired that should not have
+6. Diagnose every miss before moving on
+7. Enter all results in the register under seeded failures caught, including misses
+8. Send the post-test notification
+
+**For every miss, establish:** was the threshold too loose, was the seeded failure realistic enough to catch, did the check run at all, and has this check ever fired on a real failure.
+
+**A missed seeded failure moves that type to the front of the incident protocol's response schedule.** See `agentic-incident-playbook`.
+
+### Notifications
+
+**Pre-test.** Sent to anyone whose work depends on an agent being tested. States what is being tested, when, whether sandbox or production, who to contact if something unusual appears, and when results will follow.
+
+**Post-test.** States how many of five were caught and names any missed, what gaps surfaced, what is changing with owners and dates, and whether anything the recipient relies on is affected.
+
+**If the test surfaces something real,** meaning an agent has actually been producing wrong output in production, that is an incident. Route to `agentic-incident-playbook` and notify everyone affected with how long it has been happening and the correction timeline.
+
+**All Notification Drafts must be approved by monitoring owner first.**
 
 ---
 
-## Voice Rules
+## Constraints
 
-- Label every detection method as deterministic, anomaly detection, or model-based. Never describe a scheduled query as AI.
-- State precision and seeded failure catch rate when reporting on a check's performance. Never report one without the other.
-- When a flag's cause is unknown, say unknown. Do not assign a likely cause without evidence.
+**Propose dispositions. Never apply them.** Dispositions are the labels the anomaly detection feedback loop learns from. Inaccurate labels applied at volume teach the model to ignore the wrong things.
+
+**Never set a threshold without stating it is a proposal.** How much deviation is tolerable is a business judgment.
+
+**Never infer a check owner.** Ask.
+
+**Label every detection method accurately.** Deterministic, anomaly detection, or model-based. A scheduled query is a scheduled query.
+
+**Report precision and seeded failure catch rate together.** Either alone is misleading. A check with 95% precision that catches no seeded failures has stopped detecting anything.
+
+**Say unknown when a cause is unknown.** Never construct a plausible cause to close a flag.
+
+**Never write to the user repository.** Propose repository updates. A human applies them.
+
+**Never insert seeded failure data into any system.** You generate the data and the instructions. A human performs the insertion and the removal. This holds for sandboxes as well as production.
 
 ---
 
@@ -316,12 +252,12 @@ Run it in a test environment with seeded data. Never in production.
 
 | File | When to read | What's inside |
 |---|---|---|
-| `references/detection-checks-register.md` | First-time setup | Template for logging every check with threshold, owner, and performance |
-| `references/agent-inventory-template.md` | Step 2 | Template for cataloging every agent and its permissions |
-| `references/quarterly-exercise-guide.md` | Quarterly | Full run sheet for the combined detection and response exercise |
+| `references/detection-register.md` | Build Step 6, and all quarterly analysis | Register structure, worked examples, reading guide, retirement criteria |
 
 ## Related Skills
 
-- **agentic-incident-playbook** — the response protocol that runs when detection escalates to a real incident. Shares the quarterly exercise with this skill.
-- **semantic-layer-setup** — required prerequisite. Provides the metric definitions and field permissions this skill monitors against.
-- **why-audit** — supplies the false confidence markers used in Type 4 detection
+- **non-human-identity** — supplies the agent permission baseline. Type 2 checks cannot be built without `permitted_write_fields` and `scoped_population`.
+- **agentic-incident-playbook** — response protocol when a flagged output reached a decision
+- **semantic-layer-setup** — metric definitions and field-level access documentation
+- **why-audit** — false confidence markers used in Type 4 screening
+- **causal-model-setup** — the context object this skill cross-references when dispositioning flags
